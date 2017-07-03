@@ -1,5 +1,5 @@
 {
-  "name": "laeso-backend",
+  "name": "vea1-backend",
   "version": "0.0.1",
   "dependencies": {
     "bcrypt": "^1.0.2",

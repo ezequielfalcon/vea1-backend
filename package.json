@@ -1,0 +1,10 @@
+{
+  "name": "laeso-backend",
+  "version": "0.0.1",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "pg-promise": "^6.3.0"
+  }
+}

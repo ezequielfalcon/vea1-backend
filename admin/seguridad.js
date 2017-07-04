@@ -34,14 +34,13 @@ module.exports = function (db, pgp) {
                                 .then(roles => {
                                     if (roles && roles.length > 0) {
                                         let rolesToken = [];
-                                        console.log(roles);
                                         for (let rol of roles) {
                                             rolesToken.push(rol.nombre);
                                         }
                                         const usuarioDb = {
                                             nombre: user,
                                             cliente: req.body.cliente,
-                                            roles: rolesToken
+                                            roles: JSON.stringify(rolesToken)
                                         };
                                         const token = jwt.sign(usuarioDb, process.env.JWT_SECRET, {expiresIn: "24h"});
                                         res.json({

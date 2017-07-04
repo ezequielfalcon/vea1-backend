@@ -22,7 +22,9 @@ module.exports = function (db, pgp) {
                     });
                 }
                 else {
-
+                    let roles = decoded.roles;
+                    console.log('roles de usuario: ' + roles);
+                    res.json({resultado: true})
                 }
             });
         }

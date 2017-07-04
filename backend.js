@@ -44,7 +44,8 @@ app.get('/api', function(req, res) {
 app.post('/login', seguridad.login);
 
 //ADMIN
-app.get('/admin/clientes', clientes.getUsuarios);
+app.get('/admin/clientes', clientes.getClientes);
+app.post('/admin/clientes');
 
 //#####################################################################################
 

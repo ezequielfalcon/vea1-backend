@@ -8,9 +8,9 @@ module.exports = function (db, pgp) {
     let module = {};
     const qrm = pgp.queryResult;
 
-    module.getUsuarios = getUsuarios;
+    module.getClientes = getClientes;
 
-    function getUsuarios(req, res) {
+    function getClientes(req, res) {
         const token = req.headers['x-access-token'];
         if (token) {
             jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
@@ -24,7 +24,7 @@ module.exports = function (db, pgp) {
                 else {
                     let roles = JSON.parse(decoded.roles);
                     if (roles.includes('admin')) {
-                        db.manyOrNone('select * from clientes;')
+                        db.manyOrNone('select * from clientes_internos;')
                             .then(clientes => {
                                 res.json({resultado: true, datos: clientes})
                             })

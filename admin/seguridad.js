@@ -32,8 +32,7 @@ module.exports = function (db, pgp) {
                                 'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
                                 'where usuarios.nombre = $1;', req.body.usuario)
                                 .then(roles => {
-                                    if (roles) {
-                                        console.log(roles);
+                                    if (roles && roles.length > 0) {
                                         let rolesToken = [];
                                         for (let rol of roles) {
                                             rolesToken.push(rol.nombre);

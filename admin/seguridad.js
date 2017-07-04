@@ -34,6 +34,7 @@ module.exports = function (db, pgp) {
                                 .then(roles => {
                                     if (roles && roles.length > 0) {
                                         let rolesToken = [];
+                                        console.log(roles);
                                         for (let rol of roles) {
                                             rolesToken.push(rol.nombre);
                                         }

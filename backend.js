@@ -16,6 +16,8 @@ const cn = {
 
 const db = pgp(process.env.DATABASE_URL || cn);
 
+const seguridad = require('./admin/seguridad')(db, pgp);
+
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
@@ -34,6 +36,12 @@ app.get('/api', function(req, res) {
         mensaje: "Backend del sistema!!"
     })
 });
+
+//######################################## API ########################################
+
+app.post('/login', seguridad.login);
+
+//#####################################################################################
 
 const reportingApp = express();
 app.use('/reportes', reportingApp);

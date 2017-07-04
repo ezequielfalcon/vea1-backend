@@ -55,7 +55,7 @@ module.exports = function (db, pgp) {
                                     }
                                 })
                                 .catch( err => {
-                                    console.log(err);
+                                    console.error(err);
                                     res.status(500).json({resultado: false, mensaje: err})
                                 });
                         }
@@ -69,7 +69,7 @@ module.exports = function (db, pgp) {
                     }
                 })
                 .catch( err => {
-                    console.log(err);
+                    console.error(err);
                     res.status(500).json({resultado: false, mensaje: err})
                 })
         }

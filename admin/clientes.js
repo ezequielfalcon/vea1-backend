@@ -23,10 +23,22 @@ module.exports = function (db, pgp) {
                 }
                 else {
                     let roles = JSON.parse(decoded.roles);
-                    for (let rol of roles) {
-                        console.log('rol de usuario encontrado: ' + rol);
+                    if (roles.contains('admin')) {
+                        db.manyOrNone('select * from clientes;')
+                            .then(clientes => {
+                                res.json({resultado: true, datos: clientes})
+                            })
+                            .catch( err => {
+                                console.error(err);
+                                res.status(500).json({resultado: false, mensaje: err})
+                            });
                     }
-                    res.json({resultado: true})
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
                 }
             });
         }

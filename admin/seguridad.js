@@ -33,6 +33,7 @@ module.exports = function (db, pgp) {
                                 'where usuarios.nombre = $1;', req.body.usuario)
                                 .then(roles => {
                                     if (roles) {
+                                        console.log(roles);
                                         let rolesToken = [];
                                         for (let rol of roles) {
                                             rolesToken.push(rol.nombre);

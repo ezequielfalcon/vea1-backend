@@ -7,8 +7,14 @@ const bcrypt = require('bcrypt');
 module.exports = function (db, pgp) {
     let module = {};
     const qrm = pgp.queryResult;
+    const cliente = 'VEA';
 
     module.getClientes = getClientes;
+    module.clienteNuevo = clienteNuevo;
+
+    function clienteNuevo(req, res) {
+
+    }
 
     function getClientes(req, res) {
         const token = req.headers['x-access-token'];
@@ -23,7 +29,7 @@ module.exports = function (db, pgp) {
                 }
                 else {
                     let roles = JSON.parse(decoded.roles);
-                    if (roles.includes('admin')) {
+                    if (roles.includes('admin') && decoded.cliente === cliente) {
                         db.manyOrNone('select * from clientes_internos;')
                             .then(clientes => {
                                 res.json({resultado: true, datos: clientes})

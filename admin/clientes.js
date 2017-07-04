@@ -23,7 +23,9 @@ module.exports = function (db, pgp) {
                 }
                 else {
                     let roles = decoded.roles;
-                    console.log('roles de usuario: ' + roles);
+                    for (let rol of roles) {
+                        console.log('rol de usuario encontrado: ' + rol);
+                    }
                     res.json({resultado: true})
                 }
             });

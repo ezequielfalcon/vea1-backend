@@ -23,7 +23,7 @@ module.exports = function (db, pgp) {
                 }
                 else {
                     let roles = JSON.parse(decoded.roles);
-                    if (roles.contains('admin')) {
+                    if (roles.includes('admin')) {
                         db.manyOrNone('select * from clientes;')
                             .then(clientes => {
                                 res.json({resultado: true, datos: clientes})

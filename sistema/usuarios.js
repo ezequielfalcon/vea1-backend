@@ -25,19 +25,24 @@ module.exports = function (db) {
                     let roles = JSON.parse(decoded.roles);
                     if (roles.includes('admin')) {
                         if (req.params.nombre) {
-                            db.none('DELETE FROM usuarios WHERE nombre = $1;', req.params.nombre)
-                                .then(() => {
-                                    res.json({resultado:true});
-                                })
-                                .catch( err => {
-                                    console.error(err);
-                                    if (err.code === '23503') {
-                                        res.status(400).json({resultado: false, mensaje: 'El usuario tiene datos y no se puede borrar!'})
-                                    }
-                                    else {
-                                        res.status(500).json({resultado: false, mensaje: err})
-                                    }
-                                });
+                            if (req.params.nombre !== decoded.nombre) {
+                                db.none('DELETE FROM usuarios WHERE nombre = $1;', req.params.nombre)
+                                    .then(() => {
+                                        res.json({resultado:true});
+                                    })
+                                    .catch( err => {
+                                        console.error(err);
+                                        if (err.code === '23503') {
+                                            res.status(400).json({resultado: false, mensaje: 'El usuario tiene datos y no se puede borrar!'})
+                                        }
+                                        else {
+                                            res.status(500).json({resultado: false, mensaje: err})
+                                        }
+                                    });
+                            }
+                            else {
+                                res.status(400).json({resultado: false, mensaje: 'No se puede borrar a sí mismo!'})
+                            }
                         }
                         else {
                             res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})

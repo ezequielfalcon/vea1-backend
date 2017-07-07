@@ -85,7 +85,7 @@ module.exports = function (db) {
                                     if (err.code === '23503') {
                                         res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
                                     }
-                                    if (err.code === '23505') {
+                                    else if (err.code === '23505') {
                                         res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
                                     }
                                     else {

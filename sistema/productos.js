@@ -8,6 +8,7 @@ module.exports = function (db) {
 
     module.nuevoProducto = nuevoProducto;
     module.verProductos = verProductos;
+    module.modificarProducto = modificarProducto;
 
     module.nuevaCategoria = nuevaCategoria;
     module.verCategorias = verCategorias;
@@ -635,6 +636,64 @@ module.exports = function (db) {
                                         res.status(400).json({resultado: false, mensaje: 'Ya hay una categoría con ese nombre.'})
                                     }
                                     else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                })
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros!'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function modificarProducto(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.params.id && req.body.nombre && req.body.stock_minimo && req.body.codigo
+                            && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
+                            const marca = req.body.id_marca || null;
+                            db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
+                                'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
+                                ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
+                                , req.body.id_unidad, marca, req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado: true})
+                                })
+                                .catch(err => {
+                                    if (err.code === '23503') {
+                                        res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
+                                    }
+                                    else if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                                    }
+                                    else {
+                                        console.error(err);
                                         res.status(500).json({resultado: false, mensaje: err.detail})
                                     }
                                 })

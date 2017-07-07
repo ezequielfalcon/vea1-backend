@@ -3,7 +3,7 @@
  */
 const jwt = require('jsonwebtoken');
 
-module.exports = function (db, pgp) {
+module.exports = function (db) {
     let module = {};
 
     module.nuevoProducto = nuevoProducto;

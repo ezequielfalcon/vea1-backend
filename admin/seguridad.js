@@ -4,7 +4,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-module.exports = function (db, pgp) {
+module.exports = function (db) {
     let module = {};
 
     module.login = login;

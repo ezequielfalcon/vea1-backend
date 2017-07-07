@@ -81,7 +81,7 @@ module.exports = function (db) {
                                     res.json({resultado: true, id: nuevoP.id})
                                 })
                                 .catch(err => {
-                                    console.error(err);
+                                    console.error(err.error);
                                     if (err.code === '23503') {
                                         res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
                                     }

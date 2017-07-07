@@ -141,7 +141,7 @@ module.exports = function (db) {
                                 })
                         }
                         else {
-                            db.manyOrNone('SELECT * FROM categorias WHERE id_cliente_int = $2;', decoded.cliente)
+                            db.manyOrNone('SELECT * FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
                                 .then(categorias => {
                                     res.json({resultado: true, datos: categorias})
                                 })

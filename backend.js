@@ -45,7 +45,9 @@ app.post('/login', seguridad.login);
 
 //ADMIN
 app.get('/admin/clientes', clientes.getClientes);
-app.post('/admin/clientes');
+app.post('/admin/clientes', clientes.clienteNuevo);
+app.put('/admin/clientes/:codigo', clientes.modificarCliente);
+app.del('/admin/clientes/:codigo', clientes.borrarCliente);
 
 //#####################################################################################
 

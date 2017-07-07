@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 
 module.exports = function (db, pgp) {
     let module = {};
-    const qrm = pgp.queryResult;
 
     module.nuevoProducto = nuevoProducto;
     module.verProductos = verProductos;

@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 
 module.exports = function (db, pgp) {
     let module = {};
-    const qrm = pgp.queryResult;
     const cliente = 'VEA';
 
     module.getClientes = getClientes;

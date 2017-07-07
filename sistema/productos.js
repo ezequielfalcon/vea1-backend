@@ -125,7 +125,7 @@ module.exports = function (db) {
                     let roles = JSON.parse(decoded.roles);
                     if ((roles.includes('stock') || roles.includes('admin'))) {
                         if (req.params.id) {
-                            db.oneOrNone('SELECT * FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
+                            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
                                 , [req.params.id, decoded.cliente])
                                 .then(categoria => {
                                     if (categoria) {
@@ -141,7 +141,7 @@ module.exports = function (db) {
                                 })
                         }
                         else {
-                            db.manyOrNone('SELECT * FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
+                            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
                                 .then(categorias => {
                                     res.json({resultado: true, datos: categorias})
                                 })
@@ -232,7 +232,8 @@ module.exports = function (db) {
                 }
                 else {
                     if (req.params.id) {
-                        db.oneOrNone('SELECT * FROM productos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id, decoded.cliente])
+                        db.oneOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca ' +
+                            'FROM productos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id, decoded.cliente])
                             .then(producto => {
                                 if (producto) {
                                     res.json({resultado: true, datos: producto})
@@ -247,7 +248,8 @@ module.exports = function (db) {
                             })
                     }
                     else {
-                        db.manyOrNone('SELECT * FROM productos WHERE id_cliente_int = $1 ORDER BY id DESC LIMIT 50;', decoded.cliente)
+                        db.manyOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca ' +
+                            'FROM productos WHERE id_cliente_int = $1 ORDER BY id DESC LIMIT 50;', decoded.cliente)
                             .then(productos => {
                                 res.json({resultado: true, datos: productos})
                             })

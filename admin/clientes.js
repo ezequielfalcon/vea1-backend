@@ -33,12 +33,12 @@ module.exports = function (db) {
                                     res.json({resultado:true});
                                 })
                                 .catch( err => {
-                                    console.error(err);
+                                    console.error(err.detail);
                                     if (err.code === '23503') {
                                         res.status(400).json({resultado: false, mensaje: 'El cliente tiene datos y no se puede borrar!'})
                                     }
                                     else {
-                                        res.status(500).json({resultado: false, mensaje: err})
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
                                     }
                                 });
                         }
@@ -86,8 +86,8 @@ module.exports = function (db) {
                                                 res.json({resultado: true})
                                             })
                                             .catch( err => {
-                                                console.error(err);
-                                                res.status(500).json({resultado: false, mensaje: err})
+                                                console.error(err.detail);
+                                                res.status(500).json({resultado: false, mensaje: err.detail})
                                             })
                                     }
                                     else {
@@ -184,7 +184,7 @@ module.exports = function (db) {
                 else {
                     let roles = JSON.parse(decoded.roles);
                     if (roles.includes('admin') && decoded.cliente === cliente) {
-                        db.manyOrNone('select * from clientes_internos;')
+                        db.manyOrNone('SELECT codigo, nombre FROM clientes_internos;')
                             .then(clientes => {
                                 res.json({resultado: true, datos: clientes})
                             })

@@ -31,7 +31,7 @@ module.exports = function (db) {
                             db.none('UPDATE categorias SET nombre = $1 WHERE id = $2 AND id_cliente_int = $3;',
                                 [req.body.nombre, req.params.id, decoded.cliente])
                                 .then(() => {
-
+                                    res.json({resultado: true})
                                 })
                                 .catch( err => {
                                     res.status(500).json({resultado: false, mensaje: err.detail})

@@ -509,7 +509,7 @@ module.exports = function (db) {
                     if ((roles.includes('stock') || roles.includes('admin'))) {
                         if (req.body.nombre && req.body.stock_minimo && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
-                            const marca = req.body.id_marca || '';
+                            const marca = req.body.id_marca || null;
                             db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
                                 'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
                             ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo,

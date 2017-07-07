@@ -564,40 +564,31 @@ module.exports = function (db) {
                     });
                 }
                 else {
-                    let roles = JSON.parse(decoded.roles);
-                    if ((roles.includes('stock') || roles.includes('admin'))) {
-                        if (req.params.id) {
-                            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
-                                , [req.params.id, decoded.cliente])
-                                .then(categoria => {
-                                    if (categoria) {
-                                        res.json({resultado: true, datos: categoria})
-                                    }
-                                    else {
-                                        res.status(404).json({resultado: false, mensaje: 'Categoría no encontrada!'})
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error(err.detail);
-                                    res.status(500).json({resultado: false, mensaje: err.detail})
-                                })
-                        }
-                        else {
-                            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
-                                .then(categorias => {
-                                    res.json({resultado: true, datos: categorias})
-                                })
-                                .catch(err => {
-                                    console.error(err.detail);
-                                    res.status(500).json({resultado: false, mensaje: err.detail})
-                                })
-                        }
+                    if (req.params.id) {
+                        db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
+                            , [req.params.id, decoded.cliente])
+                            .then(categoria => {
+                                if (categoria) {
+                                    res.json({resultado: true, datos: categoria})
+                                }
+                                else {
+                                    res.status(404).json({resultado: false, mensaje: 'Categoría no encontrada!'})
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err.detail);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
+                            })
                     }
                     else {
-                        res.status(403).json({
-                            resultado: false,
-                            mensaje: 'Permiso denegado!'
-                        });
+                        db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
+                            .then(categorias => {
+                                res.json({resultado: true, datos: categorias})
+                            })
+                            .catch(err => {
+                                console.error(err.detail);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
+                            })
                     }
                 }
             });
@@ -749,7 +740,7 @@ module.exports = function (db) {
                     }
                     else {
                         db.manyOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca ' +
-                            'FROM productos WHERE id_cliente_int = $1 ORDER BY id DESC LIMIT 50;', decoded.cliente)
+                            'FROM productos WHERE id_cliente_int = $1 ORDER BY nombre ASC LIMIT 50;', decoded.cliente)
                             .then(productos => {
                                 res.json({resultado: true, datos: productos})
                             })

@@ -21,6 +21,7 @@ const adminClientes = require('./admin/clientes')(db);
 
 const usuarios = require('./sistema/usuarios')(db);
 const productos = require('./sistema/productos')(db);
+const proveedores = require('./sistema/proveedores')(db);
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -82,6 +83,11 @@ app.get('/productos/unidades', productos.verUnidades);
 app.put('/productos/unidades/:id', productos.modificarUnidad);
 app.delete('/productos/unidades/:id', productos.borrarUnidad);
 
+//proveedores
+app.post('/proveedores', proveedores.nuevoProveedor);
+app.get('/proveedores', proveedores.verProveedores);
+app.put('/proveedores/:id', proveedores.modificarProveedor);
+app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
 //#####################################################################################
 

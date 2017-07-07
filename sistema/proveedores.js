@@ -183,8 +183,9 @@ module.exports = function (db) {
                     let roles = JSON.parse(decoded.roles);
                     if ((roles.includes('stock') || roles.includes('admin'))) {
                         if (req.body.nombre) {
-                            db.one('INSERT INTO proveedores (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
-                                , [req.body.nombre, decoded.cliente])
+                            const telefono = req.body.telefono || null;
+                            db.one('INSERT INTO proveedores (nombre, telefono, id_cliente_int) VALUES ($1, $2, $3) RETURNING id;'
+                                , [req.body.nombre, telefono, decoded.cliente])
                                 .then(nuevoProveedor => {
                                     res.json({resultado: true, id: nuevoProveedor.id})
                                 })

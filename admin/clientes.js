@@ -140,12 +140,12 @@ module.exports = function (db) {
                                     res.json({resultado:true});
                                 })
                                 .catch( err => {
-                                    console.error(err);
+                                    console.error(err.detail);
                                     if (err.code === '23505') {
                                         res.status(400).json({resultado: false, mensaje: 'Ya existe un cliente con ese código!'})
                                     }
                                     else {
-                                        res.status(500).json({resultado: false, mensaje: err})
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
                                     }
                                 });
                         }
@@ -189,8 +189,8 @@ module.exports = function (db) {
                                 res.json({resultado: true, datos: clientes})
                             })
                             .catch( err => {
-                                console.error(err);
-                                res.status(500).json({resultado: false, mensaje: err})
+                                console.error(err.detail);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
                             });
                     }
                     else {

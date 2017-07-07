@@ -31,12 +31,12 @@ module.exports = function (db) {
                                         res.json({resultado:true});
                                     })
                                     .catch( err => {
-                                        console.error(err);
+                                        console.error(err.detail);
                                         if (err.code === '23503') {
                                             res.status(400).json({resultado: false, mensaje: 'El usuario tiene datos y no se puede borrar!'})
                                         }
                                         else {
-                                            res.status(500).json({resultado: false, mensaje: err})
+                                            res.status(500).json({resultado: false, mensaje: err.detail})
                                         }
                                     });
                             }
@@ -92,12 +92,12 @@ module.exports = function (db) {
                                     res.json({resultado: true})
                                 })
                                 .catch(err => {
-                                    console.error(err);
+                                    console.error(err.detail);
                                     if (err.code === '23505') {
                                         res.status(400).json({resultado: false, mensaje: 'Ya existe un usuario con ese nombre!'})
                                     }
                                     else {
-                                        res.status(500).json({resultado: false, mensaje: err.error})
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
                                     }
                                 })
                         }

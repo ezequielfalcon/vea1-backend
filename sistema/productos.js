@@ -33,7 +33,7 @@ module.exports = function (db) {
                             })
                             .catch(err => {
                                 console.error(err);
-                                res.status(500).json({resultado: false, mensaje: err.error})
+                                res.status(500).json({resultado: false, mensaje: err.detail})
                             })
                     }
                     else {
@@ -43,7 +43,7 @@ module.exports = function (db) {
                             })
                             .catch(err => {
                                 console.error(err);
-                                res.status(500).json({resultado: false, mensaje: err.error})
+                                res.status(500).json({resultado: false, mensaje: err.detail})
                             })
                     }
                 }
@@ -81,7 +81,7 @@ module.exports = function (db) {
                                     res.json({resultado: true, id: nuevoP.id})
                                 })
                                 .catch(err => {
-                                    console.error(err.error);
+                                    console.error(err.detail);
                                     if (err.code === '23503') {
                                         res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
                                     }
@@ -89,7 +89,7 @@ module.exports = function (db) {
                                         res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
                                     }
                                     else {
-                                        res.status(500).json({resultado: false, mensaje: err.error})
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
                                     }
                                 })
                         }

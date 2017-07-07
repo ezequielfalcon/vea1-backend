@@ -75,6 +75,11 @@ app.post('/productos/marcas', productos.nuevaMarca);
 app.get('/productos/marcas', productos.verMarcas);
 app.put('/productos/marcas/:id', productos.modificarMarca);
 app.delete('/productos/marcas/:id', productos.borrarMarca);
+//unidades
+app.post('/productos/unidades', productos.nuevaUnidad);
+app.get('/productos/unidades', productos.verUnidades);
+app.put('/productos/unidades/:id', productos.modificarUnidad);
+app.delete('/productos/unidades/:id', productos.borrarUnidad);
 
 
 //#####################################################################################

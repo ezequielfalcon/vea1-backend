@@ -19,6 +19,223 @@ module.exports = function (db) {
     module.verMarcas = verMarcas;
     module.borrarMarca = borrarMarca;
 
+    module.nuevaUnidad = nuevaUnidad;
+    module.modificarUnidad = modificarUnidad;
+    module.verUnidades = verUnidades;
+    module.borrarUnidad = borrarUnidad;
+
+    function borrarUnidad(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin')) {
+                        if (req.params.id) {
+                            db.none('DELETE FROM unidades WHERE id = $1 AND id_cliente_int = $2;',
+                                [req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado:true});
+                                })
+                                .catch( err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23503') {
+                                        res.status(400).json({resultado: false, mensaje: 'La unidad está en uso!'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                });
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function verUnidades(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.params.id) {
+                            db.oneOrNone('SELECT id, nombre FROM unidades WHERE id = $1 AND id_cliente_int = $2;'
+                                , [req.params.id, decoded.cliente])
+                                .then(marca => {
+                                    if (marca) {
+                                        res.json({resultado: true, datos: marca})
+                                    }
+                                    else {
+                                        res.status(404).json({resultado: false, mensaje: 'Unidad no encontrada!'})
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                        }
+                        else {
+                            db.manyOrNone('SELECT id, nombre FROM unidades WHERE id_cliente_int = $1;', decoded.cliente)
+                                .then(marcas => {
+                                    res.json({resultado: true, datos: marcas})
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function modificarUnidad(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin')) {
+                        if (req.params.id && req.body.nombre) {
+                            db.none('UPDATE unidades SET nombre = $1 WHERE id = $2 AND id_cliente_int = $3;',
+                                [req.body.nombre, req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado: true})
+                                })
+                                .catch( err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya hay una unidad con ese nombre.'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                })
+
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        })
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function nuevaUnidad(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.body.nombre) {
+                            db.one('INSERT INTO unidades (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
+                                , [req.body.nombre, decoded.cliente])
+                                .then(nuevaMarca => {
+                                    res.json({resultado: true, id: nuevaMarca.id})
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya hay una unidad con ese nombre.'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                })
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros!'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
     function borrarMarca(req, res) {
         const token = req.headers['x-access-token'];
         if (token) {

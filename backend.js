@@ -64,6 +64,7 @@ app.delete('/usuarios/:nombre', usuarios.borrarUsuario);
 //productos
 app.post('/productos', productos.nuevoProducto);
 app.get('/productos', productos.verProductos);
+app.put('/productos/:id', productos.modificarProducto);
 app.get('/productos-por-id/:id', productos.verProductos);
 //categorías
 app.post('/productos/categorias', productos.nuevaCategoria);

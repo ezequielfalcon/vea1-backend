@@ -17,7 +17,7 @@ const cn = {
 const db = pgp(process.env.DATABASE_URL || cn);
 
 const seguridad = require('./admin/seguridad')(db, pgp);
-const clientes = require('./admin/clientes')(db, pgp);
+const adminClientes = require('./admin/clientes')(db, pgp);
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -44,10 +44,13 @@ app.get('/api', function(req, res) {
 app.post('/login', seguridad.login);
 
 //ADMIN
-app.get('/admin/clientes', clientes.getClientes);
-app.post('/admin/clientes', clientes.clienteNuevo);
-app.put('/admin/clientes/:codigo', clientes.modificarCliente);
-app.del('/admin/clientes/:codigo', clientes.borrarCliente);
+//clientes
+app.get('/admin/clientes', adminClientes.getClientes);
+app.post('/admin/clientes', adminClientes.clienteNuevo);
+app.put('/admin/clientes/:codigo', adminClientes.modificarCliente);
+app.del('/admin/clientes/:codigo', adminClientes.borrarCliente);
+
+
 
 //#####################################################################################
 

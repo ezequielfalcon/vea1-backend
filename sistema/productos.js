@@ -8,10 +8,228 @@ module.exports = function (db) {
 
     module.nuevoProducto = nuevoProducto;
     module.verProductos = verProductos;
+
     module.nuevaCategoria = nuevaCategoria;
     module.verCategorias = verCategorias;
     module.borrarCategoria = borrarCategoria;
     module.modificarCategoria = modificarCategoria;
+
+    module.nuevaMarca = nuevaMarca;
+    module.modificarMarca = modificarMarca;
+    module.verMarcas = verMarcas;
+    module.borrarMarca = borrarMarca;
+
+    function borrarMarca(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin')) {
+                        if (req.params.id) {
+                            db.none('DELETE FROM marcas WHERE id = $1 AND id_cliente_int = $2;',
+                                [req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado:true});
+                                })
+                                .catch( err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23503') {
+                                        res.status(400).json({resultado: false, mensaje: 'La marca está en uso!'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                });
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function verMarcas(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.params.id) {
+                            db.oneOrNone('SELECT id, nombre FROM marcas WHERE id = $1 AND id_cliente_int = $2;'
+                                , [req.params.id, decoded.cliente])
+                                .then(marca => {
+                                    if (marca) {
+                                        res.json({resultado: true, datos: marca})
+                                    }
+                                    else {
+                                        res.status(404).json({resultado: false, mensaje: 'Marca no encontrada!'})
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                        }
+                        else {
+                            db.manyOrNone('SELECT id, nombre FROM marcas WHERE id_cliente_int = $1;', decoded.cliente)
+                                .then(marcas => {
+                                    res.json({resultado: true, datos: marcas})
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function modificarMarca(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin')) {
+                        if (req.params.id && req.body.nombre) {
+                            db.none('UPDATE marcas SET nombre = $1 WHERE id = $2 AND id_cliente_int = $3;',
+                                [req.body.nombre, req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado: true})
+                                })
+                                .catch( err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya hay una marca con ese nombre.'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                })
+
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        })
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function nuevaMarca(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.body.nombre) {
+                            db.one('INSERT INTO marcas (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
+                                , [req.body.nombre, decoded.cliente])
+                                .then(nuevaMarca => {
+                                    res.json({resultado: true, id: nuevaMarca.id})
+                                })
+                                .catch(err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya hay una marca con ese nombre.'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                })
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros!'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
 
     function modificarCategoria(req, res) {
         const token = req.headers['x-access-token'];
@@ -34,7 +252,13 @@ module.exports = function (db) {
                                     res.json({resultado: true})
                                 })
                                 .catch( err => {
-                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                    console.error(err.detail);
+                                    if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya hay una categoría con ese nombre.'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
                                 })
 
                         }
@@ -284,11 +508,12 @@ module.exports = function (db) {
                     let roles = JSON.parse(decoded.roles);
                     if ((roles.includes('stock') || roles.includes('admin'))) {
                         if (req.body.nombre && req.body.stock_minimo && req.body.codigo
-                            && req.body.iva && req.body.id_categoria && req.body.id_marca && req.body.id_unidad) {
+                            && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
+                            const marca = req.body.id_marca || 'null';
                             db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
                                 'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
                             ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo,
-                                    req.body.id_categoria, req.body.id_unidad, decoded.cliente, req.body.id_marca])
+                                    req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
                                 .then(nuevoP => {
                                     res.json({resultado: true, id: nuevoP.id})
                                 })

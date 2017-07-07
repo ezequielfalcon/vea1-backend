@@ -70,6 +70,11 @@ app.post('/productos/categorias', productos.nuevaCategoria);
 app.get('/productos/categorias', productos.verCategorias);
 app.put('/productos/categorias/:id', productos.modificarCategoria);
 app.delete('/productos/categorias/:id', productos.borrarCategoria);
+//marcas
+app.post('/productos/marcas', productos.nuevaMarca);
+app.get('/productos/marcas', productos.verMarcas);
+app.put('/productos/marcas/:id', productos.modificarMarca);
+app.delete('/productos/marcas/:id', productos.borrarMarca);
 
 
 //#####################################################################################

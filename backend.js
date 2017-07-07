@@ -46,6 +46,7 @@ app.get('/api', function(req, res) {
 //LOGIN
 app.post('/login', seguridad.login);
 
+
 //ADMIN
 //clientes
 app.get('/admin/clientes', adminClientes.getClientes);
@@ -53,15 +54,23 @@ app.post('/admin/clientes', adminClientes.clienteNuevo);
 app.put('/admin/clientes/:codigo', adminClientes.modificarCliente);
 app.delete('/admin/clientes/:codigo', adminClientes.borrarCliente);
 
+
 //SISTEMA
 //admin
 app.post('/usuarios', usuarios.nuevoUsuario);
 app.delete('/usuarios/:nombre', usuarios.borrarUsuario);
 
+
 //productos
 app.post('/productos', productos.nuevoProducto);
 app.get('/productos', productos.verProductos);
-app.get('/productos/:id', productos.verProductos);
+app.get('/productos-por-id/:id', productos.verProductos);
+//categorías
+app.post('/productos/categorias', productos.nuevaCategoria);
+app.get('/productos/categorias', productos.verCategorias);
+app.put('/productos/categorias/:id', productos.modificarCategoria);
+app.delete('/productos/categorias/:id', productos.borrarCategoria);
+
 
 //#####################################################################################
 

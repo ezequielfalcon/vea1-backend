@@ -31,7 +31,7 @@ module.exports = function (db) {
                                             }
                                             const usuarioDb = {
                                                 nombre: user,
-                                                cliente: req.body.cliente,
+                                                cliente: clienteDb.id_cliente_int,
                                                 roles: JSON.stringify(rolesToken)
                                             };
                                             const token = jwt.sign(usuarioDb, process.env.JWT_SECRET, {expiresIn: "24h"});

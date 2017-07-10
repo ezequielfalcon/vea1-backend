@@ -12,65 +12,69 @@ module.exports = function (db) {
     function login(req, res) {
         if (req.body.usuario && req.body.clave && req.body.cliente){
             let user = req.body.usuario;
-            db.oneOrNone("select clave from usuarios where nombre = $1 and id_cliente_int = $2;", [user, req.body.cliente])
-                .then(data => {
-                    if (data === null){
+            db.oneOrNone('SELECT id_cliente_int, clave FROM usuarios WHERE nombre = $1;', user)
+                .then(clienteDb => {
+                    if (clienteDb) {
+                        if (bcrypt.compareSync(clienteDb.id_cliente_int, req.body.cliente)) {
+                            if (bcrypt.compareSync(req.body.clave, clienteDb.clave)){
+                                console.log("Inicio de sesión de usuario " + user);
+                                db.manyOrNone('select roles.nombre ' +
+                                    'from roles ' +
+                                    'inner join roles_por_usuario on roles.id = roles_por_usuario.id_rol ' +
+                                    'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
+                                    'where usuarios.nombre = $1;', req.body.usuario)
+                                    .then(roles => {
+                                        if (roles && roles.length > 0) {
+                                            let rolesToken = [];
+                                            for (let rol of roles) {
+                                                rolesToken.push(rol.nombre);
+                                            }
+                                            const usuarioDb = {
+                                                nombre: user,
+                                                cliente: req.body.cliente,
+                                                roles: JSON.stringify(rolesToken)
+                                            };
+                                            const token = jwt.sign(usuarioDb, process.env.JWT_SECRET, {expiresIn: "24h"});
+                                            res.json({
+                                                resultado: true,
+                                                mensaje: "Sesión iniciada",
+                                                token: token,
+                                                usuario: user
+                                            })
+                                        }
+                                        else {
+                                            res.status(500).json({resultado: false, mensaje: 'El usuario no tiene roles asignados!'})
+                                        }
+                                    })
+                                    .catch( err => {
+                                        console.error(err.detail);
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    });
+                            }
+                            else{
+                                console.log("Inicio de sesión no válida por usuario " + user);
+                                res.status(401).json({
+                                    resultado: false,
+                                    mensaje: "Credenciales no válidas"
+                                })
+                            }
+                        }
+                        else {
+                            console.log("Usuario con hash de cliente invalido: " + user);
+                            res.status(401).json({
+                                resultado: false,
+                                mensaje: "Error de validación"
+                            })
+                        }
+                    }
+                    else {
                         console.log("Usuario inexistente intentó inciar sesión: " + user);
                         res.status(400).json({
                             resultado: false,
                             mensaje: "El usuario no existe"
                         })
                     }
-                    else{
-                        let hashDb = data.clave;
-                        if (bcrypt.compareSync(req.body.clave, hashDb)){
-                            console.log("Inicio de sesión de usuario " + user);
-                            db.manyOrNone('select roles.nombre ' +
-                                'from roles ' +
-                                'inner join roles_por_usuario on roles.id = roles_por_usuario.id_rol ' +
-                                'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
-                                'where usuarios.nombre = $1;', req.body.usuario)
-                                .then(roles => {
-                                    if (roles && roles.length > 0) {
-                                        let rolesToken = [];
-                                        for (let rol of roles) {
-                                            rolesToken.push(rol.nombre);
-                                        }
-                                        const usuarioDb = {
-                                            nombre: user,
-                                            cliente: req.body.cliente,
-                                            roles: JSON.stringify(rolesToken)
-                                        };
-                                        const token = jwt.sign(usuarioDb, process.env.JWT_SECRET, {expiresIn: "24h"});
-                                        res.json({
-                                            resultado: true,
-                                            mensaje: "Sesión iniciada",
-                                            token: token,
-                                            usuario: user
-                                        })
-                                    }
-                                    else {
-                                        res.status(500).json({resultado: false, mensaje: 'El usuario no tiene roles asignados!'})
-                                    }
-                                })
-                                .catch( err => {
-                                    console.error(err.detail);
-                                    res.status(500).json({resultado: false, mensaje: err.detail})
-                                });
-                        }
-                        else{
-                            console.log("Inicio de sesión no válida por usuario " + user);
-                            res.status(401).json({
-                                resultado: false,
-                                mensaje: "Credenciales no válidas"
-                            })
-                        }
-                    }
-                })
-                .catch( err => {
-                    console.error(err.detail);
-                    res.status(500).json({resultado: false, mensaje: err.detail})
-                })
+            });
         }
         else{
             console.log("error en el POST para login" + req.body);

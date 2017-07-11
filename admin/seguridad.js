@@ -84,8 +84,8 @@ module.exports = function (db) {
             });
         }
         else{
-            console.log("error en el POST para login" + req.body);
-            res.status(400).json({resultado: false, mensaje: "faltan datos del post: usuario y clave"})
+            console.error("Error en el POST para login");
+            res.status(400).json({resultado: false, mensaje: "Ingrese las credenciales correctamente!"})
         }
     }
 

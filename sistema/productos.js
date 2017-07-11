@@ -43,7 +43,7 @@ module.exports = function (db) {
                         'FROM productos ' +
                         'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
                         'INNER JOIN unidades ON productos.id_unidad = unidades.id ' +
-                        'WHERE productos.id_cliente_int = $1 ORDER BY productos.nombre ASC LIMIT 50;', decoded.cliente)
+                        'WHERE productos.id_cliente_int = $1 ORDER BY productos.nombre ASC;', decoded.cliente)
                         .then(productos => {
                             res.json({resultado: true, datos: productos})
                         })

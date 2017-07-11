@@ -134,7 +134,7 @@ module.exports = function (db) {
                                         .then(rolAdmin => {
                                             if (rolAdmin) {
                                                 db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
-                                                , [req.body.usuario, rolAdmin.id])
+                                                , [req.body.nombre, rolAdmin.id])
                                                     .then(() => {
                                                         res.json({resultado: true})
                                                     })
@@ -146,7 +146,7 @@ module.exports = function (db) {
                                                 db.one("INSERT INTO roles (nombre) VALUES ('admin') RETURNING id;")
                                                     .then(rolAdminNuevo => {
                                                         db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
-                                                            , [req.body.usuario, rolAdminNuevo.id])
+                                                            , [req.body.nombre, rolAdminNuevo.id])
                                                             .then(() => {
                                                                 res.json({resultado: true})
                                                             })

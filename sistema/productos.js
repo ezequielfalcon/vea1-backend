@@ -39,7 +39,7 @@ module.exports = function (db) {
                 }
                 else {
                     db.manyOrNone('SELECT productos.id, productos.nombre, productos.stock_minimo, productos.iva, ' +
-                        'productos.codigo, categorias.nombre, unidades.nombre ' +
+                        'productos.codigo, categorias.nombre categoria, unidades.nombre unidad ' +
                         'FROM productos ' +
                         'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
                         'INNER JOIN unidades ON productos.id_unidad = unidades.id ' +

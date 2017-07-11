@@ -130,7 +130,7 @@ module.exports = function (db) {
                                 'VALUES ($1, $2, $3, $4, $5, $6, $7);'
                                 ,[req.body.nombre, hash, req.body.cliente, nombre_apellido, email, telefono, direccion])
                                 .then(() => {
-                                    db.oneOrNone("SELECT id FROM roles WHERE nombre = 'admin' AND id_cliente_int = $1;", req.body.cliente)
+                                    db.oneOrNone("SELECT id FROM roles WHERE nombre = 'admin';")
                                         .then(rolAdmin => {
                                             if (rolAdmin) {
                                                 db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
@@ -143,7 +143,7 @@ module.exports = function (db) {
                                                     })
                                             }
                                             else {
-                                                db.one("INSERT INTO roles (nombre, id_cliente_int) VALUES ('admin', $1) RETURNING id;", req.body.cliente)
+                                                db.one("INSERT INTO roles (nombre) VALUES ('admin') RETURNING id;")
                                                     .then(rolAdminNuevo => {
                                                         db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
                                                             , [req.body.usuario, rolAdminNuevo.id])

@@ -23,7 +23,7 @@ module.exports = function (db) {
                 }
                 else {
                     let roles = JSON.parse(decoded.roles);
-                    if (roles.includes('admin')) {
+                    if (roles.includes('admin') && decoded.cliente === 'VEA') {
                         if (req.params.nombre) {
                             if (req.params.nombre !== decoded.nombre) {
                                 db.none('DELETE FROM usuarios WHERE nombre = $1;', req.params.nombre)
@@ -78,8 +78,8 @@ module.exports = function (db) {
                 }
                 else {
                     let roles = JSON.parse(decoded.roles);
-                    if (roles.includes('admin')) {
-                        if (req.body.nombre && req.body.clave) {
+                    if (roles.includes('admin') && decoded.cliente === 'VEA') {
+                        if (req.body.nombre && req.body.clave && req.body.cliente) {
                             const nombre_apellido = req.body.nombre_apellido || '';
                             const email = req.body.email || '';
                             const telefono = req.body.telefono || '';
@@ -87,9 +87,40 @@ module.exports = function (db) {
                             const hash = bcrypt.hashSync(req.body.clave, 10);
                             db.none('INSERT INTO usuarios (nombre, clave, id_cliente_int, nombre_apellido, email, telefono, direccion) ' +
                                 'VALUES ($1, $2, $3, $4, $5, $6, $7);'
-                                ,[req.body.nombre, hash, decoded.cliente, nombre_apellido, email, telefono, direccion])
+                                ,[req.body.nombre, hash, req.body.cliente, nombre_apellido, email, telefono, direccion])
                                 .then(() => {
-                                    res.json({resultado: true})
+                                    db.oneOrNone("SELECT id FROM roles WHERE nombre = 'admin' AND id_cliente_int = $1;", req.body.cliente)
+                                        .then(rolAdmin => {
+                                            if (rolAdmin) {
+                                                db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
+                                                , [req.body.usuario, rolAdmin.id])
+                                                    .then(() => {
+                                                        res.json({resultado: true})
+                                                    })
+                                                    .catch(err => {
+                                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                                    })
+                                            }
+                                            else {
+                                                db.one("INSERT INTO roles (nombre, id_cliente_int) VALUES ('admin', $1) RETURNING id;", req.body.cliente)
+                                                    .then(rolAdminNuevo => {
+                                                        db.none('INSERT INTO roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_date);'
+                                                            , [req.body.usuario, rolAdminNuevo.id])
+                                                            .then(() => {
+                                                                res.json({resultado: true})
+                                                            })
+                                                            .catch(err => {
+                                                                res.status(500).json({resultado: false, mensaje: err.detail})
+                                                            })
+                                                    })
+                                                    .catch(err => {
+                                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                                    })
+                                            }
+                                        })
+                                        .catch(err => {
+                                            res.status(500).json({resultado: false, mensaje: err.detail})
+                                        })
                                 })
                                 .catch(err => {
                                     console.error(err.detail);

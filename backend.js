@@ -19,7 +19,7 @@ const db = pgp(process.env.DATABASE_URL || cn);
 const seguridad = require('./admin/seguridad')(db);
 const adminClientes = require('./admin/clientes')(db);
 
-const usuarios = require('./sistema/usuarios')(db);
+const usuariosAdmin = require('./admin/usuarios')(db);
 const productos = require('./sistema/productos')(db);
 const proveedores = require('./sistema/proveedores')(db);
 
@@ -54,12 +54,14 @@ app.get('/admin/clientes', adminClientes.getClientes);
 app.post('/admin/clientes', adminClientes.clienteNuevo);
 app.put('/admin/clientes/:codigo', adminClientes.modificarCliente);
 app.delete('/admin/clientes/:codigo', adminClientes.borrarCliente);
+//usuarios
+app.post('/usuarios', usuariosAdmin.nuevoUsuario);
+app.delete('/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 
 
 //SISTEMA
 //admin
-app.post('/usuarios', usuarios.nuevoUsuario);
-app.delete('/usuarios/:nombre', usuarios.borrarUsuario);
+
 
 
 //productos

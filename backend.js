@@ -55,8 +55,8 @@ app.post('/admin/clientes', adminClientes.clienteNuevo);
 app.put('/admin/clientes/:codigo', adminClientes.modificarCliente);
 app.delete('/admin/clientes/:codigo', adminClientes.borrarCliente);
 //usuarios
-app.post('/usuarios', usuariosAdmin.nuevoUsuario);
-app.delete('/usuarios/:nombre', usuariosAdmin.borrarUsuario);
+app.post('/admin/usuarios', usuariosAdmin.nuevoUsuario);
+app.delete('/admin/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 
 
 //SISTEMA

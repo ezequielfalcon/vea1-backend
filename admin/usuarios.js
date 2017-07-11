@@ -9,6 +9,47 @@ module.exports = function (db) {
 
     module.nuevoUsuario = nuevoUsuario;
     module.borrarUsuario = borrarUsuario;
+    module.verUsuarios = verUsuarios;
+
+    function verUsuarios(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin') && decoded.cliente === 'VEA') {
+                        db.many('SELECT nombre, nombre_apellido, email, telefono, direccion, id_cliente_int FROM usuarios;')
+                            .then(usuariosDb => {
+                                res.json({resultado: true, datos: usuariosDb})
+                            })
+                            .catch(err => {
+                                console.error(err.detail);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
+                            })
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
 
     function borrarUsuario(req, res) {
         const token = req.headers['x-access-token'];

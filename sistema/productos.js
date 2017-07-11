@@ -8,6 +8,7 @@ module.exports = function (db) {
 
     module.nuevoProducto = nuevoProducto;
     module.verProductos = verProductos;
+    module.verProductosFull = verProductosFull;
     module.modificarProducto = modificarProducto;
 
     module.nuevaCategoria = nuevaCategoria;
@@ -24,6 +25,42 @@ module.exports = function (db) {
     module.modificarUnidad = modificarUnidad;
     module.verUnidades = verUnidades;
     module.borrarUnidad = borrarUnidad;
+
+    function verProductosFull(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    db.manyOrNone('SELECT productos.id, productos.nombre, productos.stock_minimo, productos.iva, ' +
+                        'productos.codigo, categorias.nombre, unidades.nombre ' +
+                        'FROM productos ' +
+                        'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
+                        'INNER JOIN unidades ON productos.id_unidad = unidades.id ' +
+                        'WHERE productos.id_cliente_int = $1 ORDER BY productos.nombre ASC LIMIT 50;', decoded.cliente)
+                        .then(productos => {
+                            res.json({resultado: true, datos: productos})
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            res.status(500).json({resultado: false, mensaje: err.detail})
+                        })
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
 
     function borrarUnidad(req, res) {
         const token = req.headers['x-access-token'];

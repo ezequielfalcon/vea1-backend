@@ -67,19 +67,26 @@ module.exports = function (db) {
                     if (roles.includes('admin') && decoded.cliente === 'VEA') {
                         if (req.params.nombre) {
                             if (req.params.nombre !== decoded.nombre) {
-                                db.none('DELETE FROM usuarios WHERE nombre = $1;', req.params.nombre)
+                                db.none('DELETE FROM roles_por_usuario WHERE usuario = $1;', req.params.nombre)
                                     .then(() => {
-                                        res.json({resultado:true});
+                                        db.none('DELETE FROM usuarios WHERE nombre = $1;', req.params.nombre)
+                                            .then(() => {
+                                                res.json({resultado:true});
+                                            })
+                                            .catch( err => {
+                                                console.error(err.detail);
+                                                if (err.code === '23503') {
+                                                    res.status(400).json({resultado: false, mensaje: 'El usuario tiene datos y no se puede borrar!'})
+                                                }
+                                                else {
+                                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                                }
+                                            });
                                     })
-                                    .catch( err => {
+                                    .catch(err => {
                                         console.error(err.detail);
-                                        if (err.code === '23503') {
-                                            res.status(400).json({resultado: false, mensaje: 'El usuario tiene datos y no se puede borrar!'})
-                                        }
-                                        else {
-                                            res.status(500).json({resultado: false, mensaje: err.detail})
-                                        }
-                                    });
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    })
                             }
                             else {
                                 res.status(400).json({resultado: false, mensaje: 'No se puede borrar a sí mismo!'})

@@ -90,6 +90,7 @@ app.delete('/productos/unidades/:id', productos.borrarUnidad);
 //proveedores
 app.post('/proveedores', proveedores.nuevoProveedor);
 app.get('/proveedores', proveedores.verProveedores);
+app.get('/proveedores/:id', proveedores.verProveedores);
 app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 

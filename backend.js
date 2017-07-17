@@ -71,6 +71,7 @@ app.get('/productos', productos.verProductos);
 app.get('/productos-full', productos.verProductosFull);
 app.put('/productos/:id', productos.modificarProducto);
 app.get('/productos-por-id/:id', productos.verProductos);
+app.delete('/productos/:id', productos.borrarProducto);
 //categorías
 app.post('/productos/categorias', productos.nuevaCategoria);
 app.get('/productos/categorias', productos.verCategorias);

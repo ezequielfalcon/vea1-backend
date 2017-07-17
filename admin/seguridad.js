@@ -11,8 +11,9 @@ module.exports = function (db) {
 
     function login(req, res) {
         if (req.body.usuario && req.body.clave && req.body.cliente){
-            let user = req.body.usuario.toLowerCase();
-            db.oneOrNone('SELECT id_cliente_int, clave FROM usuarios WHERE nombre = $1;', user)
+            let user = req.body.usuario;
+            let userString = String(user).toLowerCase();
+            db.oneOrNone('SELECT id_cliente_int, clave FROM usuarios WHERE nombre = $1;', userString)
                 .then(clienteDb => {
                     if (clienteDb) {
                         bcrypt.compare(clienteDb.id_cliente_int, req.body.cliente)
@@ -21,7 +22,7 @@ module.exports = function (db) {
                                     bcrypt.compare(req.body.clave, clienteDb.clave)
                                         .then(hashClave => {
                                             if (hashClave) {
-                                                console.log("Inicio de sesión de usuario " + user);
+                                                console.log("Inicio de sesión de usuario " + userString);
                                                 db.manyOrNone('select roles.nombre ' +
                                                     'from roles ' +
                                                     'inner join roles_por_usuario on roles.id = roles_por_usuario.id_rol ' +
@@ -34,7 +35,7 @@ module.exports = function (db) {
                                                                 rolesToken.push(rol.nombre);
                                                             }
                                                             const usuarioDb = {
-                                                                nombre: user,
+                                                                nombre: userString,
                                                                 cliente: clienteDb.id_cliente_int,
                                                                 roles: JSON.stringify(rolesToken)
                                                             };
@@ -43,7 +44,7 @@ module.exports = function (db) {
                                                                 resultado: true,
                                                                 mensaje: "Sesión iniciada",
                                                                 token: token,
-                                                                usuario: user
+                                                                usuario: userString
                                                             })
                                                         }
                                                         else {
@@ -56,7 +57,7 @@ module.exports = function (db) {
                                                     });
                                             }
                                             else{
-                                                console.log("Inicio de sesión no válida por usuario " + user);
+                                                console.log("Inicio de sesión no válida por usuario " + userString);
                                                 res.status(401).json({
                                                     resultado: false,
                                                     mensaje: "Credenciales no válidas"
@@ -65,7 +66,7 @@ module.exports = function (db) {
                                         })
                                 }
                                 else {
-                                    console.log("Usuario con hash de cliente invalido: " + user);
+                                    console.log("Usuario con hash de cliente invalido: " + userString);
                                     res.status(401).json({
                                         resultado: false,
                                         mensaje: "Error de validación"
@@ -75,7 +76,7 @@ module.exports = function (db) {
                             });
                     }
                     else {
-                        console.log("Usuario inexistente intentó inciar sesión: " + user);
+                        console.log("Usuario inexistente intentó inciar sesión: " + userString);
                         res.status(400).json({
                             resultado: false,
                             mensaje: "El usuario no existe"

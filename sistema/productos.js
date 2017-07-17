@@ -758,23 +758,31 @@ module.exports = function (db) {
                         if (req.params.id && req.body.nombre && req.body.stock_minimo && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
                             const marca = req.body.id_marca || null;
-                            db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
-                                'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
-                                ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
-                                , req.body.id_unidad, marca, req.params.id, decoded.cliente])
-                                .then(() => {
-                                    res.json({resultado: true})
-                                })
-                                .catch(err => {
-                                    if (err.code === '23503') {
-                                        res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
-                                    }
-                                    else if (err.code === '23505') {
-                                        res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                            db.oneOrNone('SELECT nombre FROM productos WHERE codigo = $1 AND id_cliente_int = $2;', [req.body.codigo, decoded.cliente])
+                                .then(codigoDb => {
+                                    if (codigoDb) {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
                                     }
                                     else {
-                                        console.error(err);
-                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                        db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
+                                            'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
+                                            ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
+                                                , req.body.id_unidad, marca, req.params.id, decoded.cliente])
+                                            .then(() => {
+                                                res.json({resultado: true})
+                                            })
+                                            .catch(err => {
+                                                if (err.code === '23503') {
+                                                    res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
+                                                }
+                                                else if (err.code === '23505') {
+                                                    res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                                                }
+                                                else {
+                                                    console.error(err);
+                                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                                }
+                                            })
                                     }
                                 })
                         }

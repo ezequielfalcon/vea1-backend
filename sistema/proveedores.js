@@ -77,7 +77,7 @@ module.exports = function (db) {
                     let roles = JSON.parse(decoded.roles);
                     if ((roles.includes('stock') || roles.includes('admin'))) {
                         if (req.params.id) {
-                            db.oneOrNone('SELECT id, nombre, telefono FROM proveedores WHERE id = $1 AND id_cliente_int = $2;'
+                            db.oneOrNone('SELECT id, nombre, telefono, email, denominacion, direccion FROM proveedores WHERE id = $1 AND id_cliente_int = $2;'
                                 , [req.params.id, decoded.cliente])
                                 .then(proveedor => {
                                     if (proveedor) {
@@ -93,7 +93,7 @@ module.exports = function (db) {
                                 })
                         }
                         else {
-                            db.manyOrNone('SELECT id, nombre, telefono FROM proveedores WHERE id_cliente_int = $1;', decoded.cliente)
+                            db.manyOrNone('SELECT id, nombre, telefono, email, denominacion, direccion FROM proveedores WHERE id_cliente_int = $1;', decoded.cliente)
                                 .then(proveedores => {
                                     res.json({resultado: true, datos: proveedores})
                                 })
@@ -134,10 +134,14 @@ module.exports = function (db) {
                 else {
                     let roles = JSON.parse(decoded.roles);
                     if (roles.includes('admin') || roles.includes('stock')) {
-                        if (req.params.id && req.body.nombre) {
+                        if (req.params.id && req.body.denominacion) {
+                            const nombre = req.body.nombre || null;
+                            const email = req.body.email || null;
+                            const direccion = req.body.direccion || null;
                             const telefono = req.body.telefono || null;
-                            db.none('UPDATE proveedores SET nombre = $1, telefono = $2 WHERE id = $3 AND id_cliente_int = $4;',
-                                [req.body.nombre, telefono, req.params.id, decoded.cliente])
+                            db.none('UPDATE proveedores SET nombre = $1, telefono = $2, email = $3, direccion = $4, denominacion = $5 ' +
+                                'WHERE id = $6 AND id_cliente_int = $7;',
+                                [nombre, telefono, email, direccion, req.body.denominacion, req.params.id, decoded.cliente])
                                 .then(() => {
                                     res.json({resultado: true})
                                 })
@@ -182,10 +186,14 @@ module.exports = function (db) {
                 else {
                     let roles = JSON.parse(decoded.roles);
                     if ((roles.includes('stock') || roles.includes('admin'))) {
-                        if (req.body.nombre) {
+                        if (req.body.denominacion) {
                             const telefono = req.body.telefono || null;
-                            db.one('INSERT INTO proveedores (nombre, telefono, id_cliente_int) VALUES ($1, $2, $3) RETURNING id;'
-                                , [req.body.nombre, telefono, decoded.cliente])
+                            const nombre = req.body.nombre || null;
+                            const email = req.body.email || null;
+                            const direccion = req.body.direccion || null;
+                            db.one('INSERT INTO proveedores (nombre, telefono, denominacion, email, direccion, id_cliente_int) ' +
+                                'VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;'
+                                , [nombre, telefono, req.body.denominacion, email, direccion, decoded.cliente])
                                 .then(nuevoProveedor => {
                                     res.json({resultado: true, id: nuevoProveedor.id})
                                 })

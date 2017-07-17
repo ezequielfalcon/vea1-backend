@@ -10,6 +10,7 @@ module.exports = function (db) {
     module.verProductos = verProductos;
     module.verProductosFull = verProductosFull;
     module.modificarProducto = modificarProducto;
+    module.borrarProducto = borrarProducto;
 
     module.nuevaCategoria = nuevaCategoria;
     module.verCategorias = verCategorias;
@@ -25,6 +26,57 @@ module.exports = function (db) {
     module.modificarUnidad = modificarUnidad;
     module.verUnidades = verUnidades;
     module.borrarUnidad = borrarUnidad;
+
+    function borrarProducto(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if (roles.includes('admin')) {
+                        if (req.params.id) {
+                            db.none('DELETE FROM productos WHERE id = $1 AND id_cliente_int = $2;',
+                                [req.params.id, decoded.cliente])
+                                .then(() => {
+                                    res.json({resultado:true});
+                                })
+                                .catch( err => {
+                                    console.error(err.detail);
+                                    if (err.code === '23503') {
+                                        res.status(400).json({resultado: false, mensaje: 'El producto está en uso!'})
+                                    }
+                                    else {
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                });
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
 
     function verProductosFull(req, res) {
         const token = req.headers['x-access-token'];

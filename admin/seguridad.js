@@ -27,7 +27,7 @@ module.exports = function (db) {
                                                     'from roles ' +
                                                     'inner join roles_por_usuario on roles.id = roles_por_usuario.id_rol ' +
                                                     'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
-                                                    'where usuarios.nombre = $1;', req.body.usuario)
+                                                    'where usuarios.nombre = $1;', userString)
                                                     .then(roles => {
                                                         if (roles && roles.length > 0) {
                                                             let rolesToken = [];

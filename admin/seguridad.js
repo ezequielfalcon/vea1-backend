@@ -11,7 +11,7 @@ module.exports = function (db) {
 
     function login(req, res) {
         if (req.body.usuario && req.body.clave && req.body.cliente){
-            let user = req.body.usuario;
+            let user = req.body.usuario.toLowerCase();
             db.oneOrNone('SELECT id_cliente_int, clave FROM usuarios WHERE nombre = $1;', user)
                 .then(clienteDb => {
                     if (clienteDb) {

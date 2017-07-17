@@ -761,7 +761,7 @@ module.exports = function (db) {
                             db.oneOrNone('SELECT nombre, id, codigo FROM productos WHERE codigo = $1 AND id_cliente_int = $2 LIMIT 1;', [req.body.codigo, decoded.cliente])
                                 .then(codigoDb => {
                                     console.log('ids: ' + req.params.id + ', ' + codigoDb.id);
-                                    if (codigoDb && (codigoDb.codigo === req.body.codigo) && (req.params.id !== codigoDb.id)) {
+                                    if (codigoDb && (codigoDb.codigo === req.body.codigo) && (req.params.id != codigoDb.id)) {
                                         res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
                                     }
                                     else {

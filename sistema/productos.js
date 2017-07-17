@@ -760,9 +760,32 @@ module.exports = function (db) {
                             const marca = req.body.id_marca || null;
                             db.oneOrNone('SELECT nombre, id, codigo FROM productos WHERE codigo = $1 AND id_cliente_int = $2 LIMIT 1;', [req.body.codigo, decoded.cliente])
                                 .then(codigoDb => {
-                                    console.log('ids: ' + req.params.id + ', ' + codigoDb.id);
-                                    if (codigoDb && (codigoDb.codigo === req.body.codigo) && (req.params.id != codigoDb.id)) {
-                                        res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
+                                    if (codigoDb)
+                                    {
+                                        if (req.params.id != codigoDb.id) {
+                                            res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
+                                        }
+                                        else {
+                                            db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
+                                                'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
+                                                ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
+                                                    , req.body.id_unidad, marca, req.params.id, decoded.cliente])
+                                                .then(() => {
+                                                    res.json({resultado: true})
+                                                })
+                                                .catch(err => {
+                                                    if (err.code === '23503') {
+                                                        res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
+                                                    }
+                                                    else if (err.code === '23505') {
+                                                        res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                                                    }
+                                                    else {
+                                                        console.error(err);
+                                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                                    }
+                                                })
+                                        }
                                     }
                                     else {
                                         db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +

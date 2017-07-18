@@ -910,7 +910,7 @@ module.exports = function (db) {
                             db.one('SELECT nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
                             ,[req.body.id_categoria, decoded.cliente])
                                 .then(categoria => {
-                                    let categoriaStr = String(categoria);
+                                    let categoriaStr = String(categoria.nombre);
                                     let nombreStr = String(req.body.nombre);
                                     const codigo = categoriaStr.substr(0, 3).toUpperCase() +
                                         getRandomInt() + nombreStr.substr(0,3).toUpperCase();

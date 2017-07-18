@@ -924,7 +924,7 @@ module.exports = function (db) {
                                                     ,[req.body.nombre, req.body.stock_minimo, req.body.iva, codigo,
                                                         req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
                                                     .then(nuevoP => {
-                                                        res.json({resultado: true, id: nuevoP.id})
+                                                        res.json({resultado: true, id: nuevoP.id, nuevoCodigo: codigo})
                                                     })
                                                     .catch(err => {
                                                         if (err.code === '23503') {

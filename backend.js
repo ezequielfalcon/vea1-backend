@@ -67,6 +67,7 @@ app.delete('/admin/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 
 //productos
 app.post('/productos', productos.nuevoProducto);
+app.post('/producto-rand', productos.nuevoProductoRand);
 app.get('/productos', productos.verProductos);
 app.get('/productos-full', productos.verProductosFull);
 app.put('/productos/:id', productos.modificarProducto);

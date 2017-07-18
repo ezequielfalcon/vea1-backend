@@ -7,6 +7,7 @@ module.exports = function (db) {
     let module = {};
 
     module.nuevoProducto = nuevoProducto;
+    module.nuevoProductoRand = nuevoProductoRandom;
     module.verProductos = verProductos;
     module.verProductosFull = verProductosFull;
     module.modificarProducto = modificarProducto;
@@ -869,6 +870,95 @@ module.exports = function (db) {
                                 console.error(err);
                                 res.status(500).json({resultado: false, mensaje: err.detail})
                             })
+                    }
+                }
+            });
+        }
+        else{
+            res.status(401).json({
+                resultado: false,
+                mensaje: 'No token provided.'
+            });
+        }
+    }
+
+    function getRandomInt() {
+        let min = 10000;
+        let max = 99999;
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+    }
+
+    function nuevoProductoRandom(req, res) {
+        const token = req.headers['x-access-token'];
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+                if (err) {
+                    console.log("Error de autenticación, token inválido!\n" + err);
+                    res.status(401).json({
+                        resultado: false,
+                        mensaje: "Error de autenticación"
+                    });
+                }
+                else {
+                    let roles = JSON.parse(decoded.roles);
+                    if ((roles.includes('stock') || roles.includes('admin'))) {
+                        if (req.body.nombre && req.body.stock_minimo
+                            && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
+                            const marca = req.body.id_marca || null;
+                            db.one('SELECT nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
+                            ,[req.body.id_categoria, decoded.cliente])
+                                .then(categoria => {
+                                    const codigo = categoria.substr(0, 3).toUpperCase() +
+                                        getRandomInt() + req.body.nombre.substr(0,3).toUpperCase();
+                                    db.oneOrNone('SELECT id FROM productos WHERE codigo = $1 AND id_cliente_int = $2;'
+                                    ,[codigo, decoded.cliente])
+                                        .then(codigoRepe => {
+                                            if (codigoRepe) {
+                                                res.status(500).json({resultado: false, mensaje: 'Error de generación de código, intente nuevamente'})
+                                            }
+                                            else {
+                                                db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
+                                                    'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
+                                                    ,[req.body.nombre, req.body.stock_minimo, req.body.iva, codigo,
+                                                        req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
+                                                    .then(nuevoP => {
+                                                        res.json({resultado: true, id: nuevoP.id})
+                                                    })
+                                                    .catch(err => {
+                                                        if (err.code === '23503') {
+                                                            res.status(400).json({resultado: false, mensaje: 'La categoría, marca o unidad especificados no existen.'})
+                                                        }
+                                                        else if (err.code === '23505') {
+                                                            res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                                                        }
+                                                        else {
+                                                            console.error(err);
+                                                            res.status(500).json({resultado: false, mensaje: err.detail})
+                                                        }
+                                                    })
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error(err);
+                                            res.status(500).json({resultado: false, mensaje: err.detail})
+                                        })
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                        }
+                        else {
+                            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros!'})
+                        }
+                    }
+                    else {
+                        res.status(403).json({
+                            resultado: false,
+                            mensaje: 'Permiso denegado!'
+                        });
                     }
                 }
             });

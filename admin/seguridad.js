@@ -44,7 +44,8 @@ module.exports = function (db) {
                                 resultado: true,
                                 mensaje: "Sesión iniciada",
                                 token: token,
-                                usuario: userString
+                                usuario: userString,
+                                rolesToken
                               })
                             }
                             else {

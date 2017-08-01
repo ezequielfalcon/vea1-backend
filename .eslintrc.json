@@ -1,0 +1,27 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "node": true
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "no-console": "off",
+        "no-extra-parens": "warn",
+        "curly": "error",
+        "eqeqeq": "warn",
+        "no-trailing-spaces": "warn",
+        "no-var": "error",
+        "prefer-const": "warn",
+        "indent": ["error", 2],
+        "prefer-arrow-callback": "error"
+    }
+}

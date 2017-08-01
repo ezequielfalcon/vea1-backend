@@ -1,0 +1,16 @@
+
+language: node_js
+
+node_js:
+  - 8.2.1
+
+build:
+  cache: true
+  cache_dir_list:
+    - $SHIPPABLE_BUILD_DIR/node_modules
+  ci:
+    - mkdir -p shippable/testresults
+    - mkdir -p shippable/codecoverage
+    - shippable_retry npm install
+    - export DISPLAY=:99.0
+    - npm run lint

@@ -53,7 +53,7 @@ module.exports = function (db) {
                             }
                           })
                           .catch( err => {
-                            console.error(err.detail);
+                            console.error(err);
                             res.status(500).json({resultado: false, mensaje: err.detail})
                           });
                       }

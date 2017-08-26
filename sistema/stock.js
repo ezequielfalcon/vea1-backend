@@ -20,7 +20,7 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if ((roles.includes('caja') || roles.includes('admin'))) {
-            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha ' +
+            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha, remitos.observaciones ' +
               'FROM remitos INNER JOIN estado_por_remito ON remitos.id = estado_por_remito.id_remito ' +
               'WHERE estado_por_remito.id_estado = 1 AND remitos.id_cliente_int = $1 ' +
               'ORDER BY remitos.fecha ASC;', decoded.cliente)
@@ -57,9 +57,10 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if ((roles.includes('caja') || roles.includes('admin'))) {
             if (req.body.id_proveedor && req.body.numero) {
-              db.one('INSERT INTO remitos (fecha, id_proveedor, id_cliente_int, numero) ' +
-                'VALUES (current_timestamp, $1, $2, $3) RETURNING id;',
-                [req.body.id_proveedor, decoded.cliente, req.body.numero])
+              const obs = req.body.observaciones || null;
+              db.one('INSERT INTO remitos (fecha, id_proveedor, id_cliente_int, numero, observaciones) ' +
+                'VALUES (current_timestamp, $1, $2, $3, $4) RETURNING id;',
+                [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
                 .then(nuevoRemito => {
                   db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
                     'VALUES ($1, 1, current_timestamp);', nuevoRemito.id)

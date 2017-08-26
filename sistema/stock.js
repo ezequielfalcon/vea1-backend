@@ -65,7 +65,7 @@ module.exports = function (db) {
                   db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
                     'VALUES ($1, 1, current_timestamp);', nuevoRemito.id)
                     .then(() => {
-                      req.json({resultado: true, id: nuevoRemito.id})
+                      res.json({resultado: true, id: nuevoRemito.id})
                     })
                     .catch(err => {
                       if (err.code === '23503') {

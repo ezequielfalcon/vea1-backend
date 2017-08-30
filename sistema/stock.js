@@ -58,9 +58,10 @@ module.exports = function (db) {
           if ((roles.includes('caja') || roles.includes('admin'))) {
             if (req.body.id_proveedor && req.body.numero) {
               const obs = req.body.observaciones || null;
-              db.oneOrNone('SELECT id FROM remitos WHERE id_proveedor = $1 AND numero = $2 AND id_cliente_int = $3;',
+              db.manyOrNone('SELECT id FROM remitos WHERE id_proveedor = $1 AND numero = $2 AND id_cliente_int = $3;',
                 [req.body.od_proveedor, req.body.numero, decoded.cliente])
                 .then(remExiste => {
+                  console.log(remExiste);
                   if (remExiste) {
                     res.status(400).json({resultado: false, mensaje: 'Ya existe un remito con ese número para ese Proveedor!'})
                   }

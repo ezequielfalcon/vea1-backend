@@ -58,39 +58,53 @@ module.exports = function (db) {
           if ((roles.includes('caja') || roles.includes('admin'))) {
             if (req.body.id_proveedor && req.body.numero) {
               const obs = req.body.observaciones || null;
-              db.one('INSERT INTO remitos (fecha, id_proveedor, id_cliente_int, numero, observaciones) ' +
-                'VALUES (current_timestamp, $1, $2, $3, $4) RETURNING id;',
-                [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
-                .then(nuevoRemito => {
-                  db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
-                    'VALUES ($1, 1, current_timestamp);', nuevoRemito.id)
-                    .then(() => {
-                      res.json({resultado: true, id: nuevoRemito.id})
-                    })
-                    .catch(err => {
-                      if (err.code === '23503') {
-                        res.status(400).json({resultado: false, mensaje: 'El proveedor especificado no existe.'})
-                      }
-                      else if (err.code === '23505') {
-                        res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
-                      }
-                      else {
-                        console.error(err);
-                        res.status(500).json({resultado: false, mensaje: err.detail})
-                      }
-                    })
-                })
-                .catch(err => {
-                  if (err.code === '23503') {
-                    res.status(400).json({resultado: false, mensaje: 'El proveedor especificado no existe.'})
-                  }
-                  else if (err.code === '23505') {
-                    res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+              db.oneOrNone('SELECT id FROM remitos WHERE id_proveedor = $1 AND numero = $2 AND id_cliente_int = $3;',
+                [req.body.id_proveedor, req.body.numero, decoded.cliente])
+                .then(remExiste => {
+                  console.log(remExiste);
+                  if (remExiste) {
+                    res.status(400).json({resultado: false, mensaje: 'Ya existe un remito con ese número para ese Proveedor!'})
                   }
                   else {
-                    console.error(err);
-                    res.status(500).json({resultado: false, mensaje: err.detail})
+                    db.one('INSERT INTO remitos (fecha, id_proveedor, id_cliente_int, numero, observaciones) ' +
+                      'VALUES (current_timestamp, $1, $2, $3, $4) RETURNING id;',
+                      [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
+                      .then(nuevoRemito => {
+                        db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
+                          'VALUES ($1, 1, current_timestamp);', nuevoRemito.id)
+                          .then(() => {
+                            res.json({resultado: true, id: nuevoRemito.id})
+                          })
+                          .catch(err => {
+                            if (err.code === '23503') {
+                              res.status(400).json({resultado: false, mensaje: 'El proveedor especificado no existe.'})
+                            }
+                            else if (err.code === '23505') {
+                              res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                            }
+                            else {
+                              console.error(err);
+                              res.status(500).json({resultado: false, mensaje: err.detail})
+                            }
+                          })
+                      })
+                      .catch(err => {
+                        if (err.code === '23503') {
+                          res.status(400).json({resultado: false, mensaje: 'El proveedor especificado no existe.'})
+                        }
+                        else if (err.code === '23505') {
+                          res.status(400).json({resultado: false, mensaje: 'El código ya está usado.'})
+                        }
+                        else {
+                          console.error(err);
+                          res.status(500).json({resultado: false, mensaje: err.detail})
+                        }
+                      })
                   }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
                 })
             } else {
               res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})

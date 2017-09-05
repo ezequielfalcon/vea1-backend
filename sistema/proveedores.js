@@ -75,7 +75,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id) {
               db.oneOrNone('SELECT id, nombre, telefono, email, denominacion, direccion FROM proveedores WHERE id = $1 AND id_cliente_int = $2;'
                 , [req.params.id, decoded.cliente])
@@ -185,7 +185,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.denominacion) {
               const telefono = req.body.telefono || null;
               const nombre = req.body.nombre || null;

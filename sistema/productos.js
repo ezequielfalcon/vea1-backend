@@ -179,7 +179,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id) {
               db.oneOrNone('SELECT id, nombre FROM unidades WHERE id = $1 AND id_cliente_int = $2;'
                 , [req.params.id, decoded.cliente])
@@ -289,7 +289,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.nombre) {
               db.one('INSERT INTO unidades (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
                 , [req.body.nombre, decoded.cliente])
@@ -391,7 +391,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id) {
               db.oneOrNone('SELECT id, nombre FROM marcas WHERE id = $1 AND id_cliente_int = $2;'
                 , [req.params.id, decoded.cliente])
@@ -501,7 +501,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.nombre) {
               db.one('INSERT INTO marcas (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
                 , [req.body.nombre, decoded.cliente])
@@ -704,7 +704,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.nombre) {
               db.one('INSERT INTO categorias (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'
                 , [req.body.nombre, decoded.cliente])
@@ -755,7 +755,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id && req.body.nombre && req.body.stock_minimo && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;
@@ -763,6 +763,7 @@ module.exports = function (db) {
                 .then(codigoDb => {
                   if (codigoDb)
                   {
+                    // eslint-disable-next-line eqeqeq
                     if (req.params.id != codigoDb.id) {
                       res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
                     }
@@ -903,7 +904,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.nombre && req.body.stock_minimo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;
@@ -986,7 +987,7 @@ module.exports = function (db) {
         }
         else {
           const roles = JSON.parse(decoded.roles);
-          if ((roles.includes('stock') || roles.includes('admin'))) {
+          if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.nombre && req.body.stock_minimo && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;

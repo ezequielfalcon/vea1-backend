@@ -4,7 +4,7 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = function (db) {
-  let module = {};
+  const module = {};
   const cliente = 'VEA';
 
   module.getClientes = getClientes;
@@ -24,7 +24,7 @@ module.exports = function (db) {
           });
         }
         else {
-          let roles = JSON.parse(decoded.roles);
+          const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') && decoded.cliente === cliente) {
             if (req.params.codigo) {
               db.none('DELETE FROM clientes_internos WHERE codigo = $1;', req.params.codigo)
@@ -74,7 +74,7 @@ module.exports = function (db) {
           });
         }
         else {
-          let roles = JSON.parse(decoded.roles);
+          const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') && decoded.cliente === cliente) {
             if (req.params.codigo && req.body.nombre) {
               db.oneOrNone('SELECT codigo from clientes_internos where codigo = $1;', req.params.codigo)
@@ -131,7 +131,7 @@ module.exports = function (db) {
           });
         }
         else {
-          let roles = JSON.parse(decoded.roles);
+          const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') && decoded.cliente === cliente) {
             if (req.body.codigo && req.body.nombre) {
               db.none('INSERT INTO clientes_internos (codigo, nombre) VALUES ($1, $2);', [req.body.codigo, req.body.nombre])
@@ -181,7 +181,7 @@ module.exports = function (db) {
           });
         }
         else {
-          let roles = JSON.parse(decoded.roles);
+          const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') && decoded.cliente === cliente) {
             db.manyOrNone('SELECT codigo, nombre FROM clientes_internos;')
               .then(clientes => {

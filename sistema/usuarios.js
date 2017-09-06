@@ -35,9 +35,8 @@ module.exports = function (db) {
                   db.manyOrNone('select roles.id, roles.nombre ' +
                     'from roles inner join roles_por_usuario ON roles.id = roles_por_usuario.id_rol ' +
                     'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
-                    'where roles_por_usuario.usuario = $1 and usuarios.id_cliente_int = $2 ;', [usuario.usuario, decoded.cliente])
+                    'where roles_por_usuario.usuario = $1 and usuarios.id_cliente_int = $2 ;', [usuario.nombre, decoded.cliente])
                     .then(rolesUsuario => {
-                      console.log('Roles del usuario: ' + rolesUsuario.length);
                       for (const rolDb of rolesUsuario) {
                         usuarioNuevo.roles.push(rolDb);
                       }

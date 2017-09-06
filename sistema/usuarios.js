@@ -23,16 +23,27 @@ module.exports = function (db) {
               'from usuarios where id_cliente_int = $1;', decoded.cliente)
               .then(usuarios => {
                 let usuariosListos = 0;
+                const usuariosConRoles = [];
                 for (const usuario of usuarios) {
+                  const usuarioNuevo = {};
+                  usuarioNuevo.nombre = usuario.nombre;
+                  usuarioNuevo.nombre_apellido = usuario.nombre_apellido;
+                  usuarioNuevo.email = usuario.email;
+                  usuarioNuevo.telefono = usuario.telefono;
+                  usuarioNuevo.direccion = usuario.direccion;
+                  usuarioNuevo.roles = [];
                   db.manyOrNone('select id, nombre ' +
                     'from roles inner join roles_por_usuario ON roles.id = roles_por_usuario.id_rol ' +
                     'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
                     'where roles_por_usuario.usuario = $1 and usuarios.id_cliente_int = $2 ;', [usuario.usuario, decoded.cliente])
                     .then(rolesUsuario => {
-                      usuario.roles = rolesUsuario;
+                      for (const rolDb of rolesUsuario) {
+                        usuarioNuevo.roles.push(rolDb);
+                      }
                       usuariosListos++;
+                      usuariosConRoles.push(usuarioNuevo);
                       if (usuariosListos === usuarios.length) {
-                        res.json({resultado: true, datos: usuarios})
+                        res.json({resultado: true, datos: usuariosConRoles})
                       }
                     })
                     .catch(err => {

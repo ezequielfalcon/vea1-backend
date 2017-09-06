@@ -4,6 +4,38 @@ module.exports = function (db) {
   const module = {};
 
   module.verUsuarios = verUsuarios;
+  module.verRoles = verRoles;
+
+  function verRoles(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          db.manyOrNone('select id, nombre from roles;')
+            .then(rolesDb => {
+              res.json({resultado: true, datos: rolesDb})
+            })
+            .catch(err => {
+              console.error(err);
+              res.status(500).json({resultado: false, mensaje: err.detail})
+            })
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verUsuarios(req, res) {
     const token = req.headers['x-access-token'];

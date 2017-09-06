@@ -68,7 +68,9 @@ app.delete('/admin/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 //SISTEMA
 
 //admin
+//usuarios
 app.get('/usuarios', usuarios.verUsuarios);
+app.get('/roles', usuarios.verRoles);
 
 
 //productos

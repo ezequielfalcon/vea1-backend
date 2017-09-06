@@ -37,6 +37,7 @@ module.exports = function (db) {
                     'INNER JOIN usuarios on roles_por_usuario.usuario = usuarios.nombre ' +
                     'where roles_por_usuario.usuario = $1 and usuarios.id_cliente_int = $2 ;', [usuario.usuario, decoded.cliente])
                     .then(rolesUsuario => {
+                      console.log('Roles del usuario: ' + rolesUsuario.length);
                       for (const rolDb of rolesUsuario) {
                         usuarioNuevo.roles.push(rolDb);
                       }

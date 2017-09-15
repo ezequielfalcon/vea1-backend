@@ -71,6 +71,7 @@ app.delete('/admin/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 //usuarios
 app.get('/usuarios', usuarios.verUsuarios);
 app.post('/usuarios', usuarios.crearUsuario);
+app.delete('/usuarios/:nombre', usuarios.borrarUsuario);
 app.get('/roles', usuarios.verRoles);
 
 

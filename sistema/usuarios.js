@@ -8,6 +8,61 @@ module.exports = function (db) {
   module.verRoles = verRoles;
   module.crearUsuario = crearUsuario;
   module.borrarUsuario = borrarUsuario;
+  module.verUsuario = verUsuario;
+
+  function verUsuario(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin')) {
+            if (req.params.nombre) {
+              db.oneOrNone('select usuarios.nombre, usuarios.nombre_apellido, usuarios.email, usuarios.telefono, ' +
+                'usuarios.direccion, roles_por_usuario.id_rol from usuarios ' +
+                'inner join roles_por_usuario on usuarios.nombre = roles_por_usuario.usuario ' +
+                'where usuarios.nombre = $1 and usuarios.id_cliente_int = $2 ' +
+                'GROUP BY  usuarios.nombre LIMIT 1;', [req.params.nombre, decoded.cliente])
+                .then(usuario => {
+                  if(usuario) {
+                    res.json({resultado: true, datos: usuario})
+                  }
+                  else {
+                    res.status(404).json({resultado: false, mensaje: 'No se encontró al usuario ' + req.params.nombre})
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            }
+            else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function borrarUsuario(req, res) {
     const token = req.headers['x-access-token'];
@@ -52,6 +107,9 @@ module.exports = function (db) {
               else {
                 res.status(400).json({resultado: false, mensaje: 'No puede borrarse a si mismo!'})
               }
+            }
+            else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
             }
           }
           else {
@@ -119,6 +177,9 @@ module.exports = function (db) {
                     res.status(500).json({resultado: false, mensaje: err.detail})
                   }
                 })
+            }
+            else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
             }
           }
           else {

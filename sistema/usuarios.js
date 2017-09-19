@@ -28,7 +28,7 @@ module.exports = function (db) {
               db.oneOrNone('select usuarios.nombre, usuarios.nombre_apellido, usuarios.email, usuarios.telefono, ' +
                 'usuarios.direccion, roles_por_usuario.id_rol from usuarios ' +
                 'inner join roles_por_usuario on usuarios.nombre = roles_por_usuario.usuario ' +
-                'where usuarios.nombre = $1 and usuarios.id_cliente_int = $2 ' +
+                'where usuarios.nombre = $1 and usuarios.id_rol = $2 ' +
                 'GROUP BY  usuarios.nombre LIMIT 1;', [req.params.nombre, decoded.cliente])
                 .then(usuario => {
                   if(usuario) {

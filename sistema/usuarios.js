@@ -24,29 +24,34 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
             if (req.params.nombre) {
-              db.none('delete from roles_por_usuario where usuario = $1;', req.params.nombre).then(() => {
-                db.none('delete from usuarios where nombre = $1 AND id_cliente_int = $2;',
-                  [req.params.nombre, decoded.cliente])
-                  .then(() => {
-                    res.json({resultado: true})
-                  })
-                  .catch(err => {
-                    if (err.code === '23503') {
-                      res.status(400).json({resultado: false, mensaje: 'Error de relaciones.'})
-                    }
-                    else if (err.code === '23505') {
-                      res.status(400).json({resultado: false, mensaje: 'No puede borrar un usuario con datos asociados!'})
-                    }
-                    else {
-                      console.error(err);
-                      res.status(500).json({resultado: false, mensaje: err.detail})
-                    }
-                  })
-              })
-                .catch(err => {
-                  console.error(err);
-                  res.status(500).json({resultado: false, mensaje: err.detail})
+              if (req.params.nombre !== decoded.nombre) {
+                db.none('delete from roles_por_usuario where usuario = $1;', req.params.nombre).then(() => {
+                  db.none('delete from usuarios where nombre = $1 AND id_cliente_int = $2;',
+                    [req.params.nombre, decoded.cliente])
+                    .then(() => {
+                      res.json({resultado: true})
+                    })
+                    .catch(err => {
+                      if (err.code === '23503') {
+                        res.status(400).json({resultado: false, mensaje: 'Error de relaciones.'})
+                      }
+                      else if (err.code === '23505') {
+                        res.status(400).json({resultado: false, mensaje: 'No puede borrar un usuario con datos asociados!'})
+                      }
+                      else {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      }
+                    })
                 })
+                  .catch(err => {
+                    console.error(err);
+                    res.status(500).json({resultado: false, mensaje: err.detail})
+                  })
+              }
+              else {
+                res.status(400).json({resultado: false, mensaje: 'No puede borrarse a si mismo!'})
+              }
             }
           }
           else {

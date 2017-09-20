@@ -9,6 +9,77 @@ module.exports = function (db) {
   module.crearUsuario = crearUsuario;
   module.borrarUsuario = borrarUsuario;
   module.verUsuario = verUsuario;
+  module.modUsuario = modUsuario;
+
+  function modUsuario(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin')) {
+            if (req.params.nombre && req.body.clave && req.body.id_rol) {
+              const nomre_apellido = req.body.nombre_apellido || null;
+              const email = req.body.email || null;
+              const telefono = req.body.telefono || null;
+              const direccion = req.body.direccion || null;
+              const hash = bcrypt.hashSync(req.body.clave, 10);
+              db.none('delete from roles_por_usuario where usuario = $1;', req.params.nombre)
+                .then(() => {
+                  db.none('insert into roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_timestamp);',
+                    [req.params.nombre, req.body.id_rol])
+                    .then(() => {
+                      db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
+                        ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, req.params.nombre, hash])
+                        .then(() => {
+                          res.json({resultado: true})
+                        })
+                        .catch(err => {
+                          console.error(err);
+                          res.status(500).json({resultado: false, mensaje: err.detail})
+                        })
+                    })
+                    .catch(err => {
+                      if (err.code === '23503') {
+                        res.status(500).json({resultado: false, mensaje: 'El rol especificado no existe!'})
+                      } else {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      }
+                    })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            }
+            else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verUsuario(req, res) {
     const token = req.headers['x-access-token'];

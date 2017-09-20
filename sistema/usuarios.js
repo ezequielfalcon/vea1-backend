@@ -29,7 +29,7 @@ module.exports = function (db) {
                 'usuarios.direccion, roles_por_usuario.id_rol from usuarios ' +
                 'inner join roles_por_usuario on usuarios.nombre = roles_por_usuario.usuario ' +
                 'where usuarios.nombre = $1 and usuarios.id_cliente_int = $2 ' +
-                'GROUP BY  roles_por_usuario.id_rol LIMIT 1;', [req.params.nombre, decoded.cliente])
+                'GROUP BY  usuarios.nombre, roles_por_usuario.id_rol LIMIT 1;', [req.params.nombre, decoded.cliente])
                 .then(usuario => {
                   if(usuario) {
                     res.json({resultado: true, datos: usuario})

@@ -25,26 +25,39 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
-            if (req.params.nombre && req.body.clave && req.body.id_rol) {
+            if (req.params.nombre && req.body.id_rol) {
               const nomre_apellido = req.body.nombre_apellido || null;
               const email = req.body.email || null;
               const telefono = req.body.telefono || null;
               const direccion = req.body.direccion || null;
-              const hash = bcrypt.hashSync(req.body.clave, 10);
               db.none('delete from roles_por_usuario where usuario = $1;', req.params.nombre)
                 .then(() => {
                   db.none('insert into roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_timestamp);',
                     [req.params.nombre, req.body.id_rol])
                     .then(() => {
-                      db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
-                        ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, hash, req.params.nombre])
-                        .then(() => {
-                          res.json({resultado: true})
-                        })
-                        .catch(err => {
-                          console.error(err);
-                          res.status(500).json({resultado: false, mensaje: err.detail})
-                        })
+                      if (req.body.clave) {
+                        const hash = bcrypt.hashSync(req.body.clave, 10);
+                        db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
+                          ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, hash, req.params.nombre])
+                          .then(() => {
+                            res.json({resultado: true})
+                          })
+                          .catch(err => {
+                            console.error(err);
+                            res.status(500).json({resultado: false, mensaje: err.detail})
+                          })
+                      }
+                      else {
+                        db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
+                          'where nombre = $5;', [nomre_apellido, email, telefono, direccion, req.params.nombre])
+                          .then(() => {
+                            res.json({resultado: true})
+                          })
+                          .catch(err => {
+                            console.error(err);
+                            res.status(500).json({resultado: false, mensaje: err.detail})
+                          })
+                      }
                     })
                     .catch(err => {
                       if (err.code === '23503') {

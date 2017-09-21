@@ -37,7 +37,7 @@ module.exports = function (db) {
                     [req.params.nombre, req.body.id_rol])
                     .then(() => {
                       db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
-                        ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, req.params.nombre, hash])
+                        ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, hash, req.params.nombre])
                         .then(() => {
                           res.json({resultado: true})
                         })

@@ -227,13 +227,14 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
             if (req.body.nombre && req.body.clave && req.body.id_rol) {
+              const nombre = String(req.body.nombre);
               const nomre_apellido = req.body.nombre_apellido || null;
               const email = req.body.email || null;
               const telefono = req.body.telefono || null;
               const direccion = req.body.direccion || null;
               const hash = bcrypt.hashSync(req.body.clave, 10);
               db.none('insert into usuarios (nombre, clave, id_cliente_int, nombre_apellido, email, telefono, direccion) ' +
-                'VALUES ($1, $2, $3, $4, $5, $6, $7);', [req.body.nombre, hash, decoded.cliente, nomre_apellido, email, telefono, direccion])
+                'VALUES ($1, $2, $3, $4, $5, $6, $7);', [nombre.toLowerCase(), hash, decoded.cliente, nomre_apellido, email, telefono, direccion])
                 .then(() => {
                   db.none('insert into roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_timestamp);',
                     [req.body.nombre, req.body.id_rol])

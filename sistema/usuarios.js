@@ -25,8 +25,7 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
-            if (req.params.nombre && req.body.id_rol) {
-              const nomre_apellido = req.body.nombre_apellido || null;
+            if (req.params.nombre && req.body.id_rol && req.body.nombre_apellido) {
               const email = req.body.email || null;
               const telefono = req.body.telefono || null;
               const direccion = req.body.direccion || null;
@@ -38,7 +37,7 @@ module.exports = function (db) {
                       if (req.body.clave) {
                         const hash = bcrypt.hashSync(req.body.clave, 10);
                         db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
-                          ', clave = $5 where nombre = $6;', [nomre_apellido, email, telefono, direccion, hash, req.params.nombre])
+                          ', clave = $5 where nombre = $6;', [req.body.nombre_apellido, email, telefono, direccion, hash, req.params.nombre])
                           .then(() => {
                             res.json({resultado: true})
                           })
@@ -49,7 +48,7 @@ module.exports = function (db) {
                       }
                       else {
                         db.none('update usuarios set nombre_apellido = $1, email = $2, telefono = $3, direccion = $4 ' +
-                          'where nombre = $5;', [nomre_apellido, email, telefono, direccion, req.params.nombre])
+                          'where nombre = $5;', [req.body.nombre_apellido, email, telefono, direccion, req.params.nombre])
                           .then(() => {
                             res.json({resultado: true})
                           })

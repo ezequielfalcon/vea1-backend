@@ -237,7 +237,7 @@ module.exports = function (db) {
                 'VALUES ($1, $2, $3, $4, $5, $6, $7);', [nombre.toLowerCase(), hash, decoded.cliente, nomre_apellido, email, telefono, direccion])
                 .then(() => {
                   db.none('insert into roles_por_usuario (usuario, id_rol, fecha) VALUES ($1, $2, current_timestamp);',
-                    [req.body.nombre, req.body.id_rol])
+                    [nombre.toLowerCase(), req.body.id_rol])
                     .then(() => {
                       res.json({resultado: true})
                     })

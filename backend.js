@@ -23,6 +23,7 @@ const usuariosAdmin = require('./admin/usuarios')(db);
 const productos = require('./sistema/productos')(db);
 const proveedores = require('./sistema/proveedores')(db);
 const stock = require('./sistema/stock')(db);
+const usuarios = require('./sistema/usuarios')(db);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -31,11 +32,14 @@ app.use((req, res, next) => {
   next();
 });
 
+const reportingApp = express();
+app.use('/reportes', reportingApp);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-app.set('port', (process.env.PORT || 5000));
+app.set('port', process.env.PORT || 5000);
 
 app.get('/api', (req, res) => {
   res.json({
@@ -62,8 +66,15 @@ app.delete('/admin/usuarios/:nombre', usuariosAdmin.borrarUsuario);
 
 
 //SISTEMA
-//admin
 
+//admin
+//usuarios
+app.get('/usuarios', usuarios.verUsuarios);
+app.get('/usuarios/:nombre', usuarios.verUsuario);
+app.put('/usuarios/:nombre', usuarios.modUsuario);
+app.post('/usuarios', usuarios.crearUsuario);
+app.delete('/usuarios/:nombre', usuarios.borrarUsuario);
+app.get('/roles', usuarios.verRoles);
 
 
 //productos
@@ -103,8 +114,6 @@ app.post('/stock/remitos-recibidos', stock.recepcionRemito);
 
 //#####################################################################################
 
-const reportingApp = express();
-app.use('/reportes', reportingApp);
 
 const server = app.listen(app.get('port'), () => {
   console.log('Backend escuchando en puerto ', app.get('port'));

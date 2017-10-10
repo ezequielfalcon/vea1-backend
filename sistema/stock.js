@@ -72,7 +72,7 @@ module.exports = function (db) {
                       'VALUES (current_timestamp, $1, $2, $3, $4) RETURNING id;',
                     [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
                       .then(nuevoRemito => {
-                        db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
+                        db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha, usuario) ' +
                           'VALUES ($1, 1, current_timestamp, $2);', [nuevoRemito.id, decoded.nombre])
                           .then(() => {
                             res.json({resultado: true, id: nuevoRemito.id})

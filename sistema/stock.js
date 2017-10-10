@@ -20,8 +20,10 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('caja') || roles.includes('admin')) {
-            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha, remitos.observaciones ' +
-              'FROM remitos INNER JOIN estado_por_remito ON remitos.id = estado_por_remito.id_remito ' +
+            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha, remitos.observaciones, usuarios.nombre ' +
+              'FROM remitos ' +
+              'INNER JOIN estado_por_remito ON remitos.id = estado_por_remito.id_remito ' +
+              'INNER JOIN usuarios ON estado_por_remito.usuario = usuarios.nombre ' +
               'WHERE estado_por_remito.id_estado = 1 AND remitos.id_cliente_int = $1 ' +
               'ORDER BY remitos.fecha ASC;', decoded.cliente)
               .then(remitosRec => {
@@ -71,7 +73,7 @@ module.exports = function (db) {
                     [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
                       .then(nuevoRemito => {
                         db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha) ' +
-                          'VALUES ($1, 1, current_timestamp);', nuevoRemito.id)
+                          'VALUES ($1, 1, current_timestamp, $2);', [nuevoRemito.id, decoded.nombre])
                           .then(() => {
                             res.json({resultado: true, id: nuevoRemito.id})
                           })

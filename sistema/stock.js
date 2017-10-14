@@ -5,9 +5,14 @@ module.exports = function (db) {
 
   module.recepcionRemito = recepcionRemito;
   module.remitosRecibidos = remitosRecibidos;
-  module.cargarRemito = cargarRemito;
+  module.verRemitoParaCarga = verRemitoParaCarga;
+  module.verProductosPorRemito = verProductosPorRemito;
 
-  function cargarRemito(req, res) {
+  function verProductosPorRemito(req, res) {
+
+  }
+
+  function verRemitoParaCarga(req, res) {
     const token = req.headers['x-access-token'];
     if (token) {
       jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -21,8 +26,31 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.params.codigo) {
-
+            if (req.params.id) {
+              db.oneOrNone('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
+                .then(estadoRemito => {
+                  if (estadoRemito) {
+                    if (estadoRemito.id_estado === '1' || estadoRemito.id_estado === '2') {
+                      db.one('SELECT id, numero, id_proveedor, fecha, observaciones FROM remitos WHERE id = $1 AND id_cliente_int = $2;',
+                        [req.params.id, decoded.cliente])
+                        .then(remitoPiola => {
+                          res.json({resultado: true, datos: remitoPiola});
+                        })
+                        .catch(err => {
+                          console.error(err);
+                          res.status(500).json({resultado: false, mensaje: err.detail})
+                        })
+                    } else {
+                      res.status(400).json({resultado: false, mensaje: "El remito está finalizado o anulado!"})
+                    }
+                  } else {
+                    res.status(404).json({resultado: false, mensaje: "No existe un remito con ese ID"})
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
             } else {
               res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
             }

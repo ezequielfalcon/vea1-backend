@@ -111,6 +111,10 @@ app.delete('/proveedores/:id', proveedores.borrarProveedor);
 //stock
 app.get('/stock/remitos-recibidos', stock.remitosRecibidos);
 app.post('/stock/remitos-recibidos', stock.recepcionRemito);
+app.get('/stock/remito-para-carga/:id', stock.verRemitoParaCarga);
+app.post('/stock/confirmar-remito', stock.confirmarRemito);
+app.get('/stock/productos-remito/:id_remito', stock.verProductosPorRemito);
+app.post('/stock/agregar-producto-remito', stock.agregarProductoRemito);
 
 //#####################################################################################
 

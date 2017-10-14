@@ -9,7 +9,41 @@ module.exports = function (db) {
   module.verProductosPorRemito = verProductosPorRemito;
 
   function verProductosPorRemito(req, res) {
-
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            if (req.params.id_remito) {
+              db.manyOrNone('SELECT id_producto, cantidad, costo, fecha_vencimiento FROM productos_por_remito WHERE id_remito = $1;',
+                req.params.id_remito)
+                .then(productos => {
+                  res.json({resultado: true, datos: productos})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
   }
 
   function verRemitoParaCarga(req, res) {

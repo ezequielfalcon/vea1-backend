@@ -26,16 +26,20 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            db.manyOrNone('SELECT estado_por_remito.fecha, estados_remito.nombre, estado_por_remito.usuario ' +
-              'FROM estado_por_remito INNER JOIN  estados_remito ON estado_por_remito.id_estado = estados_remito.id ' +
-              'WHERE estado_por_remito.id_remito = $1;', decoded.cliente)
-              .then(histRemitos => {
-                res.json({resultado: true, datos: histRemitos})
-              })
-              .catch(err => {
-                console.error(err);
-                res.status(500).json({resultado: false, mensaje: err.detail})
-              })
+            if (req.params.id) {
+              db.manyOrNone('SELECT estado_por_remito.fecha, estados_remito.nombre, estado_por_remito.usuario ' +
+                'FROM estado_por_remito INNER JOIN  estados_remito ON estado_por_remito.id_estado = estados_remito.id ' +
+                'WHERE estado_por_remito.id_remito = $1;', req.params.id)
+                .then(histRemitos => {
+                  res.json({resultado: true, datos: histRemitos})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros!'})
+            }
           } else {
             res.status(403).json({
               resultado: false,

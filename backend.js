@@ -111,7 +111,7 @@ app.delete('/proveedores/:id', proveedores.borrarProveedor);
 //stock
 app.get('/stock/remitos/recibidos', stock.remitosRecibidos);
 app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
-app.get('/stock/remitos/historial', stock.historialRemitos);
+app.get('/stock/remitos/historial/:id', stock.historialRemitos);
 
 app.post('/stock/remitos/recibidos', stock.recepcionRemito);
 app.get('/stock/remitos/para-carga/:id', stock.verRemitoParaCarga);

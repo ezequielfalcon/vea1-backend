@@ -109,13 +109,15 @@ app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
 //stock
-app.get('/stock/remitos-recibidos', stock.remitosRecibidos);
-app.get('/stock/remitos-encarga', stock.remitosEnCarga);
-app.post('/stock/remitos-recibidos', stock.recepcionRemito);
-app.get('/stock/remito-para-carga/:id', stock.verRemitoParaCarga);
-app.post('/stock/confirmar-remito', stock.confirmarRemito);
-app.get('/stock/productos-remito/:id_remito', stock.verProductosPorRemito);
-app.post('/stock/agregar-producto-remito', stock.agregarProductoRemito);
+app.get('/stock/remitos/recibidos', stock.remitosRecibidos);
+app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
+app.get('/stock/remitos/historial', stock.historialRemitos);
+
+app.post('/stock/remitos/recibidos', stock.recepcionRemito);
+app.get('/stock/remito/para-carga/:id', stock.verRemitoParaCarga);
+app.post('/stock/remitos/confirmar', stock.confirmarRemito);
+app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
+app.post('/stock/remitos/agregar-producto', stock.agregarProductoRemito);
 
 //#####################################################################################
 

@@ -114,7 +114,7 @@ app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
 app.get('/stock/remitos/historial', stock.historialRemitos);
 
 app.post('/stock/remitos/recibidos', stock.recepcionRemito);
-app.get('/stock/remito/para-carga/:id', stock.verRemitoParaCarga);
+app.get('/stock/remitos/para-carga/:id', stock.verRemitoParaCarga);
 app.post('/stock/remitos/confirmar', stock.confirmarRemito);
 app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
 app.post('/stock/remitos/agregar-producto', stock.agregarProductoRemito);

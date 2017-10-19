@@ -240,7 +240,7 @@ module.exports = function (db) {
               db.oneOrNone('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
                 .then(estadoRemito => {
                   if (estadoRemito) {
-                    if (estadoRemito.id_estado === '1' || estadoRemito.id_estado === '2') {
+                    if (estadoRemito.id_estado == 1 || estadoRemito.id_estado == 2) {
                       db.one('SELECT id, numero, id_proveedor, fecha, observaciones FROM remitos WHERE id = $1 AND id_cliente_int = $2;',
                         [req.params.id, decoded.cliente])
                         .then(remitoPiola => {

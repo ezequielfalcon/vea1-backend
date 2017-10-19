@@ -110,6 +110,7 @@ app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
 //stock
 app.get('/stock/remitos-recibidos', stock.remitosRecibidos);
+app.get('/stock/remitos-encarga', stock.remitosEnCarga);
 app.post('/stock/remitos-recibidos', stock.recepcionRemito);
 app.get('/stock/remito-para-carga/:id', stock.verRemitoParaCarga);
 app.post('/stock/confirmar-remito', stock.confirmarRemito);

@@ -187,7 +187,7 @@ module.exports = function (db) {
                 .then(estadoRemito => {
                   if (estadoRemito.id_estado == '1') {
                     db.none('insert into estado_por_remito (id_remito, id_estado, fecha, usuario) VALUES ($1, 2, current_timestamp, $2);'
-                      ,[req.body.id_remito, decoded.nombre])
+                      ,[req.params.id_remito, decoded.nombre])
                       .then(() => {
                         res.json({resultado: true})
                       })

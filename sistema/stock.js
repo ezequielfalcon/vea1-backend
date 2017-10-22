@@ -183,26 +183,22 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id_remito) {
-              db.oneOrNone('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id_remito)
+              db.one('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id_remito)
                 .then(estadoRemito => {
-                  if (estadoRemito) {
-                    if (estadoRemito.id_estado === '1') {
-                      db.none('insert into estado_por_remito (id_remito, id_estado, fecha, usuario) VALUES ($1, 2, current_timestamp, $2);'
-                        ,[req.body.id_remito, decoded.nombre])
-                        .then(() => {
-                          res.json({resultado: true})
-                        })
-                        .catch(err => {
-                          console.error(err);
-                          res.status(500).json({resultado: false, mensaje: err.detail})
-                        })
-                    } else if (estadoRemito.id_estado === '3') {
-                      res.status(400).json({resultado: false, mensaje: "No se puede editar un remito finalizado"})
-                    } else {
-                      res.json({resultado: true, mensaje: "Ya es editable"})
-                    }
+                  if (estadoRemito.id_estado == '1') {
+                    db.none('insert into estado_por_remito (id_remito, id_estado, fecha, usuario) VALUES ($1, 2, current_timestamp, $2);'
+                      ,[req.body.id_remito, decoded.nombre])
+                      .then(() => {
+                        res.json({resultado: true})
+                      })
+                      .catch(err => {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      })
+                  } else if (estadoRemito.id_estado == '3') {
+                    res.status(400).json({resultado: false, mensaje: "No se puede editar un remito finalizado"})
                   } else {
-                    res.status(404).json({resultado: false, mensaje: "No existe un remito con ese ID"})
+                    res.json({resultado: true, mensaje: "Ya es editable"})
                   }
                 })
                 .catch(err => {

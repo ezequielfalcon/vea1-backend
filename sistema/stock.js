@@ -11,6 +11,45 @@ module.exports = function (db) {
   module.agregarProductoRemito = agregarProductoRemito;
   module.remitosEnCarga = remitosEnCarga;
   module.historialRemitos = historialRemitos;
+  module.quitarProductoRemito = quitarProductoRemito;
+
+  function quitarProductoRemito(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            if (req.params.id_remito  && req.params.id_producto) {
+              db.none('DELETE FROM productos_por_remito WHERE id_remito = $1 AND id_producto = $2;',
+                [req.params.id_remito, req.params.id_producto])
+                .then(() => {
+                  res.json({resultado: true});
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function historialRemitos(req, res) {
     const token = req.headers['x-access-token'];
@@ -143,27 +182,23 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.id_remito) {
-              db.oneOrNone('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
+            if (req.params.id_remito) {
+              db.one('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id_remito)
                 .then(estadoRemito => {
-                  if (estadoRemito) {
-                    if (estadoRemito.id_estado === '1') {
-                      db.none('insert into estado_por_remito (id_remito, id_estado, fecha, usuario) VALUES ($1, 2, current_timestamp, $2);'
-                        ,[req.body.id_remito, decoded.nombre])
-                        .then(() => {
-                          res.json({resultado: true})
-                        })
-                        .catch(err => {
-                          console.error(err);
-                          res.status(500).json({resultado: false, mensaje: err.detail})
-                        })
-                    } else if (estadoRemito.id_estado === '3') {
-                      res.status(400).json({resultado: false, mensaje: "No se puede editar un remito finalizado"})
-                    } else {
-                      res.json({resultado: true, mensaje: "Ya es editable"})
-                    }
+                  if (estadoRemito.id_estado == '1') {
+                    db.none('insert into estado_por_remito (id_remito, id_estado, fecha, usuario) VALUES ($1, 2, current_timestamp, $2);'
+                      ,[req.params.id_remito, decoded.nombre])
+                      .then(() => {
+                        res.json({resultado: true})
+                      })
+                      .catch(err => {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      })
+                  } else if (estadoRemito.id_estado == '3') {
+                    res.status(400).json({resultado: false, mensaje: "No se puede editar un remito finalizado"})
                   } else {
-                    res.status(404).json({resultado: false, mensaje: "No existe un remito con ese ID"})
+                    res.json({resultado: true, mensaje: "Ya es editable"})
                   }
                 })
                 .catch(err => {

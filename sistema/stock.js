@@ -182,7 +182,7 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.id_remito) {
+            if (req.params.id_remito) {
               db.oneOrNone('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
                 .then(estadoRemito => {
                   if (estadoRemito) {

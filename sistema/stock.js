@@ -240,8 +240,11 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id_remito) {
-              db.manyOrNone('SELECT id_producto, cantidad, costo, fecha_vencimiento, iva_incluido FROM productos_por_remito WHERE id_remito = $1;',
-                req.params.id_remito)
+              db.manyOrNone('SELECT productos_por_remito.id_producto, productos_por_remito.cantidad, ' +
+                'productos_por_remito.costo, productos_por_remito.fecha_vencimiento, productos_por_remito.iva_incluido, ' +
+                'productos.iva FROM productos_por_remito ' +
+                'INNER JOIN productos ON productos_por_remito.id_producto = productos.id ' +
+                'WHERE id_remito = 29;', req.params.id_remito)
                 .then(productos => {
                   res.json({resultado: true, datos: productos})
                 })

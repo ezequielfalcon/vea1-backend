@@ -244,7 +244,7 @@ module.exports = function (db) {
                 'productos_por_remito.costo, productos_por_remito.fecha_vencimiento, productos_por_remito.iva_incluido, ' +
                 'productos.iva FROM productos_por_remito ' +
                 'INNER JOIN productos ON productos_por_remito.id_producto = productos.id ' +
-                'WHERE id_remito = 29;', req.params.id_remito)
+                'WHERE id_remito = $1;', req.params.id_remito)
                 .then(productos => {
                   res.json({resultado: true, datos: productos})
                 })

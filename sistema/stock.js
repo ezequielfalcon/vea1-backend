@@ -151,8 +151,13 @@ module.exports = function (db) {
                   res.json({resultado: true})
                 })
                 .catch(err => {
-                  console.error(err);
-                  res.status(500).json({resultado: false, mensaje: err.detail})
+                  if (err.code === '23503') {
+                    res.status(400).json({resultado: false, mensaje: 'El producto ya está agregado al remito!'})
+                  }
+                  else {
+                    console.error(err);
+                    res.status(500).json({resultado: false, mensaje: err.detail})
+                  }
                 })
             } else {
               res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})

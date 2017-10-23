@@ -151,7 +151,7 @@ module.exports = function (db) {
                   res.json({resultado: true})
                 })
                 .catch(err => {
-                  if (err.code === '23503') {
+                  if (err.code === '23505') {
                     res.status(400).json({resultado: false, mensaje: 'El producto ya está agregado al remito!'})
                   }
                   else {

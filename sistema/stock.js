@@ -142,11 +142,12 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.id_remito  && req.body.id_producto && req.body.cantidad && req.body.costo) {
+            if (req.body.id_remito  && req.body.id_producto && req.body.cantidad && req.body.costo && req.body.iva) {
               const vencimiento = req.body.fecha_vencimiento || null;
-              db.none('INSERT INTO productos_por_remito (id_remito, id_producto, cantidad, costo, fecha_vencimiento) ' +
-                'VALUES ($1, $2, $3, $4, $5);', [req.body.id_remito, req.body.id_producto, req.body.cantidad,
-                req.body.costo, vencimiento])
+              const ivaInluido = req.body.iva === true || false;
+              db.none('INSERT INTO productos_por_remito (id_remito, id_producto, cantidad, costo, fecha_vencimiento, iva_incluido) ' +
+                'VALUES ($1, $2, $3, $4, $5, $6);', [req.body.id_remito, req.body.id_producto, req.body.cantidad,
+                req.body.costo, vencimiento, ivaInluido])
                 .then(() => {
                   res.json({resultado: true})
                 })
@@ -239,7 +240,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id_remito) {
-              db.manyOrNone('SELECT id_producto, cantidad, costo, fecha_vencimiento FROM productos_por_remito WHERE id_remito = $1;',
+              db.manyOrNone('SELECT id_producto, cantidad, costo, fecha_vencimiento, iva_incluido FROM productos_por_remito WHERE id_remito = $1;',
                 req.params.id_remito)
                 .then(productos => {
                   res.json({resultado: true, datos: productos})

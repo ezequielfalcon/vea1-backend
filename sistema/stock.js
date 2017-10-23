@@ -142,7 +142,7 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.id_remito  && req.body.id_producto && req.body.cantidad && req.body.costo && req.body.iva) {
+            if (req.body.id_remito  && req.body.id_producto && req.body.cantidad && req.body.costo) {
               const vencimiento = req.body.fecha_vencimiento || null;
               const ivaInluido = req.body.iva === true || false;
               db.none('INSERT INTO productos_por_remito (id_remito, id_producto, cantidad, costo, fecha_vencimiento, iva_incluido) ' +

@@ -144,7 +144,7 @@ module.exports = function (db) {
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.body.id_remito  && req.body.id_producto && req.body.cantidad && req.body.costo) {
               const vencimiento = req.body.fecha_vencimiento || null;
-              const ivaInluido = req.body.iva === true || false;
+              const ivaInluido = req.body.iva == true || false;
               db.none('INSERT INTO productos_por_remito (id_remito, id_producto, cantidad, costo, fecha_vencimiento, iva_incluido) ' +
                 'VALUES ($1, $2, $3, $4, $5, $6);', [req.body.id_remito, req.body.id_producto, req.body.cantidad,
                 req.body.costo, vencimiento, ivaInluido])

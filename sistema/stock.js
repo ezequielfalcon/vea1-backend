@@ -376,9 +376,11 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('caja') || roles.includes('admin')) {
             if (req.body.id_proveedor) {
-              let numRemito = req.body.numero;
-              if (!numRemito) {
-                numRemito = decoded.cliente.substr(0,3) + getRandomInt().toString();
+              let numRemito;
+              if (req.body.numero) {
+                numRemito = req.body.numero;
+              } else {
+                numRemito = decoded.cliente.substr(0, 3) + getRandomInt();
               }
               const obs = req.body.observaciones || null;
               db.oneOrNone('SELECT id FROM remitos WHERE id_proveedor = $1 AND numero = $2 AND id_cliente_int = $3;',
@@ -391,7 +393,7 @@ module.exports = function (db) {
                   else {
                     db.one('INSERT INTO remitos (fecha, id_proveedor, id_cliente_int, numero, observaciones) ' +
                       'VALUES (current_timestamp, $1, $2, $3, $4) RETURNING id;',
-                    [req.body.id_proveedor, decoded.cliente, req.body.numero, obs])
+                    [req.body.id_proveedor, decoded.cliente, numRemito, obs])
                       .then(nuevoRemito => {
                         db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha, usuario) ' +
                           'VALUES ($1, 1, current_timestamp, $2);', [nuevoRemito.id, decoded.nombre])

@@ -353,6 +353,14 @@ module.exports = function (db) {
     }
   }
 
+  function getRandomInt() {
+    let min = 10000;
+    let max = 99999;
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  }
+
   function recepcionRemito(req, res) {
     const token = req.headers['x-access-token'];
     if (token) {
@@ -367,10 +375,14 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('caja') || roles.includes('admin')) {
-            if (req.body.id_proveedor && req.body.numero) {
+            if (req.body.id_proveedor) {
+              let numRemito = req.body.numero;
+              if (!numRemito) {
+                numRemito = decoded.cliente.substr(0,3) + getRandomInt().toString();
+              }
               const obs = req.body.observaciones || null;
               db.oneOrNone('SELECT id FROM remitos WHERE id_proveedor = $1 AND numero = $2 AND id_cliente_int = $3;',
-                [req.body.id_proveedor, req.body.numero, decoded.cliente])
+                [req.body.id_proveedor, numRemito, decoded.cliente])
                 .then(remExiste => {
                   console.log(remExiste);
                   if (remExiste) {

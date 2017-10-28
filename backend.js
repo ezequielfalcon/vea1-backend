@@ -109,10 +109,7 @@ app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
 //stock
-app.get('/stock/remitos/recibidos', stock.remitosRecibidos);
-app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
 app.get('/stock/remitos/historial/:id', stock.historialRemitos);
-
 app.post('/stock/remitos', stock.recepcionRemito);
 app.get('/stock/remitos', stock.consultaRemitos);
 app.get('/stock/remitos/:id', stock.verRemitoParaCarga);

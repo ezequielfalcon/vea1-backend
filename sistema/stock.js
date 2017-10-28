@@ -39,7 +39,12 @@ module.exports = function (db) {
                       'WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', remito.id)
                       .then(remitoEstado => {
                         if (remitoEstado.id_estado === 1) {
-                          const remitoNuevo = remito;
+                          const remitoNuevo = {};
+                          remitoNuevo.id = remito.id;
+                          remitoNuevo.numero = remito.numero;
+                          remitoNuevo.id_proveedor = remito.id_proveedor;
+                          remitoNuevo.fecha = remito.fecha;
+                          remitoNuevo.observaciones = remito.observaciones;
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosRecibidos.push(remitoNuevo);
                           remitosProcesados++;
@@ -47,7 +52,12 @@ module.exports = function (db) {
                             res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
                           }
                         } else if (remitoEstado.id_estado === 2) {
-                          const remitoNuevo = remito;
+                          const remitoNuevo = {};
+                          remitoNuevo.id = remito.id;
+                          remitoNuevo.numero = remito.numero;
+                          remitoNuevo.id_proveedor = remito.id_proveedor;
+                          remitoNuevo.fecha = remito.fecha;
+                          remitoNuevo.observaciones = remito.observaciones;
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosEnCarga.push(remitoNuevo);
                           remitosProcesados++;

@@ -4,7 +4,6 @@ module.exports = function (db) {
   const module = {};
 
   module.recepcionRemito = recepcionRemito;
-  module.remitosRecibidos = remitosRecibidos;
   module.verRemitoParaCarga = verRemitoParaCarga;
   module.verProductosPorRemito = verProductosPorRemito;
   module.confirmarRemito = confirmarRemito;
@@ -12,6 +11,80 @@ module.exports = function (db) {
   module.remitosEnCarga = remitosEnCarga;
   module.historialRemitos = historialRemitos;
   module.quitarProductoRemito = quitarProductoRemito;
+  module.consultaRemitos = consultaRemitos;
+
+  function consultaRemitos(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha, remitos.observaciones ' +
+              'FROM remitos WHERE id_cliente_int = $1;', decoded.cliente)
+              .then(remitosTotal => {
+                if (remitosTotal) {
+                  const totalRemitos = remitosTotal.length;
+                  let remitosProcesados = 0;
+                  const remitosRecibidos = [];
+                  const remitosEnCarga = [];
+                  for (const remito of remitosTotal) {
+                    db.one('SELECT id_estado, fecha, usuario FROM estado_por_remito ' +
+                      'WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', remito.id)
+                      .then(remitoEstado => {
+                        if (remitoEstado.id_estado === 1) {
+                          const remitoNuevo = remito;
+                          remitoNuevo.usuario = remitoEstado.usuario;
+                          remitosRecibidos.push(remitoNuevo);
+                          remitosProcesados++;
+                          if (remitosProcesados === totalRemitos) {
+                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
+                          }
+                        } else if (remitoEstado.id_estado === 2) {
+                          const remitoNuevo = remito;
+                          remitoNuevo.usuario = remitoEstado.usuario;
+                          remitosEnCarga.push(remitoNuevo);
+                          remitosProcesados++;
+                          if (remitosProcesados === totalRemitos) {
+                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
+                          }
+                        } else {
+                          remitosProcesados++;
+                          if (remitosProcesados === totalRemitos) {
+                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
+                          }
+                        }
+                      })
+                      .catch(err => {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      })
+                  }
+                } else {
+                  res.json({resultado: true, datos: []})
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function quitarProductoRemito(req, res) {
     const token = req.headers['x-access-token'];
@@ -308,44 +381,6 @@ module.exports = function (db) {
             } else {
               res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
             }
-          } else {
-            res.status(403).json({
-              resultado: false,
-              mensaje: 'Permiso denegado!'
-            });
-          }
-        }
-      })
-    }
-  }
-
-  function remitosRecibidos(req, res) {
-    const token = req.headers['x-access-token'];
-    if (token) {
-      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-          console.log("Error de autenticación, token inválido!\n" + err);
-          res.status(401).json({
-            resultado: false,
-            mensaje: "Error de autenticación"
-          });
-        }
-        else {
-          const roles = JSON.parse(decoded.roles);
-          if (roles.includes('caja') || roles.includes('admin')) {
-            db.manyOrNone('SELECT remitos.id, remitos.numero, remitos.id_proveedor, remitos.fecha, remitos.observaciones, usuarios.nombre ' +
-              'FROM remitos ' +
-              'INNER JOIN estado_por_remito ON remitos.id = estado_por_remito.id_remito ' +
-              'INNER JOIN usuarios ON estado_por_remito.usuario = usuarios.nombre ' +
-              'WHERE estado_por_remito.id_estado = 1 AND remitos.id_cliente_int = $1 ' +
-              'ORDER BY remitos.fecha ASC;', decoded.cliente)
-              .then(remitosRec => {
-                res.json({resultado: true, datos: remitosRec})
-              })
-              .catch(err => {
-                console.error(err);
-                res.status(500).json({resultado: false, mensaje: err.detail})
-              })
           } else {
             res.status(403).json({
               resultado: false,

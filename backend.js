@@ -113,9 +113,10 @@ app.get('/stock/remitos/recibidos', stock.remitosRecibidos);
 app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
 app.get('/stock/remitos/historial/:id', stock.historialRemitos);
 
-app.post('/stock/remitos/recibidos', stock.recepcionRemito);
-app.get('/stock/remitos/para-carga/:id', stock.verRemitoParaCarga);
-app.put('/stock/remitos/confirmar/:id_remito', stock.confirmarRemito);
+app.post('/stock/remitos', stock.recepcionRemito);
+app.get('/stock/remitos', stock.consultaRemitos);
+app.get('/stock/remitos/:id', stock.verRemitoParaCarga);
+app.put('/stock/remitos/:id_remito', stock.confirmarRemito);
 app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
 app.post('/stock/remitos/productos', stock.agregarProductoRemito);
 app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);

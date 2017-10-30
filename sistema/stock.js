@@ -40,7 +40,7 @@ module.exports = function (db) {
                           if (productosTotal < 1) {
                             res.status(400).json({resultado: false, mensaje: 'El remito seleccionado no tiene ingún producto cargado!'})
                           } else {
-                            let procesados;
+                            let procesados = 0;
                             for(const productoRemito of productosRemito) {
                               db.one('INSERT INTO stock (id_producto, cantidad, fecha, id_cliente_int) ' +
                                 'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [productoRemito.id_producto, productoRemito.cantidad, decoded.cliente])

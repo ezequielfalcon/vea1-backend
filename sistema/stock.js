@@ -128,6 +128,7 @@ module.exports = function (db) {
                   let remitosProcesados = 0;
                   const remitosRecibidos = [];
                   const remitosEnCarga = [];
+                  const remitosCerr = [];
                   for (const remito of remitosTotal) {
                     db.one('SELECT id_estado, fecha, usuario FROM estado_por_remito ' +
                       'WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', remito.id)
@@ -142,9 +143,6 @@ module.exports = function (db) {
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosRecibidos.push(remitoNuevo);
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
                         } else if (remitoEstado.id_estado === 2) {
                           const remitoNuevo = {};
                           remitoNuevo.id = remito.id;
@@ -155,14 +153,21 @@ module.exports = function (db) {
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosEnCarga.push(remitoNuevo);
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
+                        } else if (remitoEstado.id_estado === 3) {
+                          const remitoNuevo = {};
+                          remitoNuevo.id = remito.id;
+                          remitoNuevo.numero = remito.numero;
+                          remitoNuevo.id_proveedor = remito.id_proveedor;
+                          remitoNuevo.fecha = remito.fecha;
+                          remitoNuevo.observaciones = remito.observaciones;
+                          remitoNuevo.usuario = remitoEstado.usuario;
+                          remitosCerr.push(remitoNuevo);
+                          remitosProcesados++;
                         } else {
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
+                        }
+                        if (remitosProcesados === totalRemitos) {
+                          res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga, remitosCerr: remitosCerr})
                         }
                       })
                       .catch(err => {

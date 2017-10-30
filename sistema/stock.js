@@ -11,6 +11,100 @@ module.exports = function (db) {
   module.historialRemitos = historialRemitos;
   module.quitarProductoRemito = quitarProductoRemito;
   module.consultaRemitos = consultaRemitos;
+  module.cerrarRemito = cerrarRemito;
+
+  function cerrarRemito(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            if (req.params.id) {
+              db.oneOrNone('SELECT id_estado, fecha, usuario FROM estado_por_remito ' +
+                'WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
+                .then(estadoRemito => {
+                  if (estadoRemito) {
+                    if (estadoRemito.id_estado === 2) {
+                      db.manyOrNone('SELECT id_producto, cantidad ' +
+                        'FROM productos_por_remito WHERE id_remito = $1;', req.params.id)
+                        .then(productosRemito => {
+                          const productosTotal = productosRemito.length;
+                          let procesados;
+                          for(const productoRemito of productosRemito) {
+                            db.one('INSERT INTO stock (id_producto, cantidad, fecha, id_cliente_int) ' +
+                              'VALUES ($1, $2, current_timestamp, $3) RETURNING id;',
+                            [productoRemito.id_producto, productoRemito.cantidad, decoded.cliente])
+                              .then(stockNuevo => {
+                                db.none('INSERT INTO stock_por_remito (id_stock, id_remito) VALUES ($1, $2);', [stockNuevo.id, req.params.id])
+                                  .then(() => {
+                                    procesados++;
+                                    if (productosTotal === procesados) {
+                                      db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha, usuario) ' +
+                                        'VALUES ($1, 3, current_timestamp, $2);', [req.params.id, decoded.nombre])
+                                        .then(() => {
+                                          res.json({resultado: true})
+                                        })
+                                        .catch(err => {
+                                          console.error(err);
+                                          res.status(500).json({resultado: false, mensaje: err.detail})
+                                        })
+                                    }
+                                  })
+                                  .catch(err => {
+                                    if (err.code === '23503') {
+                                      res.status(400).json({resultado: false, mensaje: 'El remito especificado no existe.'})
+                                    }
+                                    else if (err.code === '23505') {
+                                      res.status(400).json({resultado: false, mensaje: 'Ya se epecificó ese movimiento de stock para este remito.'})
+                                    }
+                                    else {
+                                      console.error(err);
+                                      res.status(500).json({resultado: false, mensaje: err.detail})
+                                    }
+                                  })
+                              })
+                              .catch(err => {
+                                console.error(err);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
+                              })
+                          }
+                        })
+                        .catch(err => {
+                          console.error(err);
+                          res.status(500).json({resultado: false, mensaje: err.detail})
+                        })
+                    } else {
+                      res.status(400).json({resultado: false, mensaje: 'Estado incorrecto de remito'})
+                    }
+                  } else {
+                    res.status(404).json({resultado: false, mensaje: 'No existe el remito'})
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function consultaRemitos(req, res) {
     const token = req.headers['x-access-token'];
@@ -34,6 +128,7 @@ module.exports = function (db) {
                   let remitosProcesados = 0;
                   const remitosRecibidos = [];
                   const remitosEnCarga = [];
+                  const remitosCerr = [];
                   for (const remito of remitosTotal) {
                     db.one('SELECT id_estado, fecha, usuario FROM estado_por_remito ' +
                       'WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', remito.id)
@@ -48,9 +143,6 @@ module.exports = function (db) {
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosRecibidos.push(remitoNuevo);
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
                         } else if (remitoEstado.id_estado === 2) {
                           const remitoNuevo = {};
                           remitoNuevo.id = remito.id;
@@ -61,14 +153,21 @@ module.exports = function (db) {
                           remitoNuevo.usuario = remitoEstado.usuario;
                           remitosEnCarga.push(remitoNuevo);
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
+                        } else if (remitoEstado.id_estado === 3) {
+                          const remitoNuevo = {};
+                          remitoNuevo.id = remito.id;
+                          remitoNuevo.numero = remito.numero;
+                          remitoNuevo.id_proveedor = remito.id_proveedor;
+                          remitoNuevo.fecha = remito.fecha;
+                          remitoNuevo.observaciones = remito.observaciones;
+                          remitoNuevo.usuario = remitoEstado.usuario;
+                          remitosCerr.push(remitoNuevo);
+                          remitosProcesados++;
                         } else {
                           remitosProcesados++;
-                          if (remitosProcesados === totalRemitos) {
-                            res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga})
-                          }
+                        }
+                        if (remitosProcesados === totalRemitos) {
+                          res.json({resultado: true, remitosRec: remitosRecibidos, remitosEnC: remitosEnCarga, remitosCerr: remitosCerr})
                         }
                       })
                       .catch(err => {

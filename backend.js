@@ -114,6 +114,7 @@ app.post('/stock/remitos', stock.recepcionRemito);
 app.get('/stock/remitos', stock.consultaRemitos);
 app.get('/stock/remitos/:id', stock.verRemitoParaCarga);
 app.put('/stock/remitos/:id_remito', stock.confirmarRemito);
+app.put('/stock/remitos/cerrar/:id', stock.cerrarRemito);
 app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
 app.post('/stock/remitos/productos', stock.agregarProductoRemito);
 app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);

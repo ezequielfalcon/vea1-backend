@@ -37,44 +37,47 @@ module.exports = function (db) {
                         'FROM productos_por_remito WHERE id_remito = $1;', req.params.id)
                         .then(productosRemito => {
                           const productosTotal = productosRemito.length;
-                          let procesados;
-                          for(const productoRemito of productosRemito) {
-                            db.one('INSERT INTO stock (id_producto, cantidad, fecha, id_cliente_int) ' +
-                              'VALUES ($1, $2, current_timestamp, $3) RETURNING id;',
-                            [productoRemito.id_producto, productoRemito.cantidad, decoded.cliente])
-                              .then(stockNuevo => {
-                                db.none('INSERT INTO stock_por_remito (id_stock, id_remito) VALUES ($1, $2);', [stockNuevo.id, req.params.id])
-                                  .then(() => {
-                                    procesados++;
-                                    if (productosTotal === procesados) {
-                                      db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha, usuario) ' +
-                                        'VALUES ($1, 3, current_timestamp, $2);', [req.params.id, decoded.nombre])
-                                        .then(() => {
-                                          res.json({resultado: true})
-                                        })
-                                        .catch(err => {
-                                          console.error(err);
-                                          res.status(500).json({resultado: false, mensaje: err.detail})
-                                        })
-                                    }
-                                  })
-                                  .catch(err => {
-                                    if (err.code === '23503') {
-                                      res.status(400).json({resultado: false, mensaje: 'El remito especificado no existe.'})
-                                    }
-                                    else if (err.code === '23505') {
-                                      res.status(400).json({resultado: false, mensaje: 'Ya se epecificó ese movimiento de stock para este remito.'})
-                                    }
-                                    else {
-                                      console.error(err);
-                                      res.status(500).json({resultado: false, mensaje: err.detail})
-                                    }
-                                  })
-                              })
-                              .catch(err => {
-                                console.error(err);
-                                res.status(500).json({resultado: false, mensaje: err.detail})
-                              })
+                          if (productosTotal < 1) {
+                            res.status(400).json({resultado: false, mensaje: 'El remito seleccionado no tiene ingún producto cargado!'})
+                          } else {
+                            let procesados;
+                            for(const productoRemito of productosRemito) {
+                              db.one('INSERT INTO stock (id_producto, cantidad, fecha, id_cliente_int) ' +
+                                'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [productoRemito.id_producto, productoRemito.cantidad, decoded.cliente])
+                                .then(stockNuevo => {
+                                  db.none('INSERT INTO stock_por_remito (id_stock, id_remito) VALUES ($1, $2);', [stockNuevo.id, req.params.id])
+                                    .then(() => {
+                                      procesados++;
+                                      if (productosTotal === procesados) {
+                                        db.none('INSERT INTO estado_por_remito (id_remito, id_estado, fecha, usuario) ' +
+                                          'VALUES ($1, 3, current_timestamp, $2);', [req.params.id, decoded.nombre])
+                                          .then(() => {
+                                            res.json({resultado: true})
+                                          })
+                                          .catch(err => {
+                                            console.error(err);
+                                            res.status(500).json({resultado: false, mensaje: err.detail})
+                                          })
+                                      }
+                                    })
+                                    .catch(err => {
+                                      if (err.code === '23503') {
+                                        res.status(400).json({resultado: false, mensaje: 'El remito especificado no existe.'})
+                                      }
+                                      else if (err.code === '23505') {
+                                        res.status(400).json({resultado: false, mensaje: 'Ya se epecificó ese movimiento de stock para este remito.'})
+                                      }
+                                      else {
+                                        console.error(err);
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                      }
+                                    })
+                                })
+                                .catch(err => {
+                                  console.error(err);
+                                  res.status(500).json({resultado: false, mensaje: err.detail})
+                                })
+                            }
                           }
                         })
                         .catch(err => {

@@ -12,6 +12,92 @@ module.exports = function (db) {
   module.quitarProductoRemito = quitarProductoRemito;
   module.consultaRemitos = consultaRemitos;
   module.cerrarRemito = cerrarRemito;
+  module.borrarRemito = borrarRemito;
+
+  function borrarRemito(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            if (req.params.id) {
+              db.one('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id_remito)
+                .then(estadoRemito => {
+                  if (estadoRemito.id_estado === 1 || estadoRemito.id_estado === 2 || roles.includes('admin')) {
+                    db.tx(t => {
+                      console.log('Ejecutando transacción para remito ' + req.params.id);
+                      const productos = t.none('DELETE FROM productos_por_remito WHERE id_remito = $1;', req.params.id);
+                      const estados = t.none('DELETE FROM estado_por_remito WHERE id_remito = $1;', req.params.id);
+                      return t.tx().batch([productos, estados]);
+                    })
+                      .then(() => {
+                        console.log('Transacción ejecutada.. continuando');
+                        db.manyOrNone('SELECT id_stock FROM stock_por_remito WHERE id_remito = $1;', req.params.id)
+                          .then(registrosStock => {
+                            db.none('DELETE FROM stock_por_remito WHERE id_remito = $1;', req.params.id)
+                              .then(() => {
+                                let regEliminados = 0;
+                                if (registrosStock.length === 0) {
+                                  res.json({resutado: true, mensaje: 'Sin movimientos de stock'})
+                                } else {
+                                  for(const registro of registrosStock) {
+                                    db.none('DELETE FROM stock WHERE id = $1;', registro.id_stock)
+                                      .then(() => {
+                                        regEliminados++;
+                                        if (regEliminados === registrosStock.length) {
+                                          res.json({resultado: true, mensaje: 'Eliminados ' + regEliminados + ' de stock'})
+                                        }
+                                      })
+                                      .catch(err => {
+                                        console.error(err);
+                                        res.status(500).json({resultado: false, mensaje: err.detail})
+                                      })
+                                  }
+                                }
+                              })
+                              .catch(err => {
+                                console.error(err);
+                                res.status(500).json({resultado: false, mensaje: err.detail})
+                              })
+                          })
+                          .catch(err => {
+                            console.error(err);
+                            res.status(500).json({resultado: false, mensaje: err.detail})
+                          })
+                      })
+                      .catch(err => {
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err.detail})
+                      })
+                  } else {
+                    res.status(403).json({resultado: false, mensaje: 'Acceso denegado, sólo un administrador puede borrar un remito cargado!'})
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function cerrarRemito(req, res) {
     const token = req.headers['x-access-token'];

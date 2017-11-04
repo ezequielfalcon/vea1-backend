@@ -44,24 +44,31 @@ module.exports = function (db) {
                           .then(registrosStock => {
                             db.none('DELETE FROM stock_por_remito WHERE id_remito = $1;', req.params.id)
                               .then(() => {
-                                let regEliminados = 0;
-                                if (registrosStock.length === 0) {
-                                  res.json({resutado: true, mensaje: 'Sin movimientos de stock'})
-                                } else {
-                                  for(const registro of registrosStock) {
-                                    db.none('DELETE FROM stock WHERE id = $1;', registro.id_stock)
-                                      .then(() => {
-                                        regEliminados++;
-                                        if (regEliminados === registrosStock.length) {
-                                          res.json({resultado: true, mensaje: 'Eliminados ' + regEliminados + ' de stock'})
-                                        }
-                                      })
-                                      .catch(err => {
-                                        console.error(err);
-                                        res.status(500).json({resultado: false, mensaje: err.detail})
-                                      })
-                                  }
-                                }
+                                db.none('DELETE FROM remitos WHERE id = $1;', req.params.id)
+                                  .then(() => {
+                                    let regEliminados = 0;
+                                    if (registrosStock.length === 0) {
+                                      res.json({resutado: true, mensaje: 'Sin movimientos de stock'})
+                                    } else {
+                                      for(const registro of registrosStock) {
+                                        db.none('DELETE FROM stock WHERE id = $1;', registro.id_stock)
+                                          .then(() => {
+                                            regEliminados++;
+                                            if (regEliminados === registrosStock.length) {
+                                              res.json({resultado: true, mensaje: 'Eliminados ' + regEliminados + ' de stock'})
+                                            }
+                                          })
+                                          .catch(err => {
+                                            console.error(err);
+                                            res.status(500).json({resultado: false, mensaje: err.detail})
+                                          })
+                                      }
+                                    }
+                                  })
+                                  .catch(err => {
+                                    console.error(err);
+                                    res.status(500).json({resultado: false, mensaje: err.detail})
+                                  })
                               })
                               .catch(err => {
                                 console.error(err);

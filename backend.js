@@ -108,7 +108,7 @@ app.get('/proveedores/:id', proveedores.verProveedores);
 app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
-//stock
+//remitos
 app.get('/stock/remitos/historial/:id', stock.historialRemitos);
 app.post('/stock/remitos', stock.recepcionRemito);
 app.get('/stock/remitos', stock.consultaRemitos);
@@ -119,6 +119,9 @@ app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
 app.post('/stock/remitos/productos', stock.agregarProductoRemito);
 app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);
 app.delete('/stock/remitos/:id', stock.borrarRemito);
+
+//stock
+app.get('/stock', stock.verStockProductos);
 
 //#####################################################################################
 

@@ -33,7 +33,7 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            db.manyOrNone('SELECT productos.id, productos.nombre, productos.stock_minimo, categorias.nombre ' +
+            db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, productos.stock_minimo, categorias.nombre ' +
               'FROM productos INNER JOIN categorias ON productos.id_categoria = categorias.id;')
               .then(productos => {
                 const productosStock = [];

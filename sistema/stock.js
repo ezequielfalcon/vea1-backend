@@ -29,7 +29,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id) {
-              db.one('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id_remito)
+              db.one('SELECT id_estado FROM estado_por_remito WHERE id_remito = $1 ORDER BY fecha DESC LIMIT 1;', req.params.id)
                 .then(estadoRemito => {
                   if (estadoRemito.id_estado === 1 || estadoRemito.id_estado === 2 || roles.includes('admin')) {
                     db.tx(t => {

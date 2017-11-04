@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 module.exports = function (db) {
   const module = {};
 
+  // remitos
   module.recepcionRemito = recepcionRemito;
   module.verRemitoParaCarga = verRemitoParaCarga;
   module.verProductosPorRemito = verProductosPorRemito;
@@ -13,6 +14,61 @@ module.exports = function (db) {
   module.consultaRemitos = consultaRemitos;
   module.cerrarRemito = cerrarRemito;
   module.borrarRemito = borrarRemito;
+
+  // stock
+
+  module.verStockProductos = verStockProductos;
+
+  function verStockProductos(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            db.manyOrNone('SELECT productos.id, productos.nombre, productos.stock_minimo, categorias.nombre ' +
+              'FROM productos INNER JOIN categorias ON productos.id_categoria = categorias.id;')
+              .then(productos => {
+                const productosStock = [];
+                let productosProcesados = 0;
+                for (const producto of productos) {
+                  const nuevoProdMod = producto;
+                  db.one('SELECT COUNT(stock.cantidad) FROM stock WHERE id_producto = $1;', producto.id)
+                    .then(cantidad => {
+                      nuevoProdMod.cantidad = cantidad.count;
+                      productosStock.push(nuevoProdMod);
+                      productosProcesados++;
+                      if (productosProcesados === productos.length) {
+                        res.json({resultado: true, datos: productosStock})
+                      }
+                    })
+                    .catch(err => {
+                      console.error(err);
+                      res.status(500).json({resultado: false, mensaje: err.detail})
+                    })
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function borrarRemito(req, res) {
     const token = req.headers['x-access-token'];

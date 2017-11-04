@@ -36,7 +36,7 @@ module.exports = function (db) {
                       console.log('Ejecutando transacción para remito ' + req.params.id);
                       const productos = t.none('DELETE FROM productos_por_remito WHERE id_remito = $1;', req.params.id);
                       const estados = t.none('DELETE FROM estado_por_remito WHERE id_remito = $1;', req.params.id);
-                      return t.tx().batch([productos, estados]);
+                      return t.batch([productos, estados]);
                     })
                       .then(() => {
                         console.log('Transacción ejecutada.. continuando');

@@ -118,6 +118,7 @@ app.put('/stock/remitos/cerrar/:id', stock.cerrarRemito);
 app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
 app.post('/stock/remitos/productos', stock.agregarProductoRemito);
 app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);
+app.delete('/stock/remitos/:id', stock.borrarRemito);
 
 //#####################################################################################
 

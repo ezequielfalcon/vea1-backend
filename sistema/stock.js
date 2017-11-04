@@ -40,7 +40,7 @@ module.exports = function (db) {
                 let productosProcesados = 0;
                 for (const producto of productos) {
                   const nuevoProdMod = producto;
-                  db.one('SELECT COUNT(stock.cantidad) FROM stock WHERE id_producto = $1;', producto.id)
+                  db.one('SELECT SUM(stock.cantidad) FROM stock WHERE id_producto = $1;', producto.id)
                     .then(cantidad => {
                       nuevoProdMod.cantidad = cantidad.count;
                       productosStock.push(nuevoProdMod);

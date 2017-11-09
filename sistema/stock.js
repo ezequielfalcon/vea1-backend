@@ -18,6 +18,42 @@ module.exports = function (db) {
   // stock
 
   module.verStockProductos = verStockProductos;
+  module.nuevoAjuste = nuevoAjuste;
+
+  function nuevoAjuste(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            const motivo = req.body.motivo || null;
+            db.one('INSERT INTO ajustes_stock (usuario, motivo, fecha) VALUES ($1, $2, current_timestamp) RETURNING id;'
+              , [decoded.nombre, motivo])
+              .then(idAjuste => {
+                res.json({resultado: true, id: idAjuste.id})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function verStockProductos(req, res) {
     const token = req.headers['x-access-token'];

@@ -18,6 +18,86 @@ module.exports = function (db) {
   // stock
 
   module.verStockProductos = verStockProductos;
+  module.nuevoAjuste = nuevoAjuste;
+  module.moverStockPorAjuste = moverStockPorAjuste;
+
+  function moverStockPorAjuste(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            if (req.params.id && req.body.id_producto && req.body.cantidad) {
+              db.task(t => {
+                return t.one('INSERT INTO stock (id_producto, cantidad, fecha, id_cliente_int) VALUES ' +
+                  '($1, $2, current_timestamp, $3) RETURNING id;', [req.body.id_producto, req.body.cantidad, decoded.cliente])
+                  .then(stockId => {
+                    return t.none('INSERT INTO stock_por_ajuste (id_ajuste, id_stock) VALUES ($1, $2);', [req.params.id, stockId.id]);
+                  })
+              })
+                .then(() => {
+                  res.json({resultado: true})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err.detail})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
+
+  function nuevoAjuste(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('stock') || roles.includes('admin')) {
+            const motivo = req.body.motivo || null;
+            db.one('INSERT INTO ajustes_stock (usuario, motivo, fecha) VALUES ($1, $2, current_timestamp) RETURNING id;'
+              , [decoded.nombre, motivo])
+              .then(idAjuste => {
+                res.json({resultado: true, id: idAjuste.id})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function verStockProductos(req, res) {
     const token = req.headers['x-access-token'];

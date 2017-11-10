@@ -20,6 +20,40 @@ module.exports = function (db) {
   module.verStockProductos = verStockProductos;
   module.nuevoAjuste = nuevoAjuste;
   module.moverStockPorAjuste = moverStockPorAjuste;
+  module.verAjustes = verAjustes;
+
+  function verAjustes(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin')) {
+            db.manyOrNone('SELECT id, usuario, motivo, fecha FROM ajustes_stock ORDER BY fecha DESC;')
+              .then(ajustes => {
+                res.json({resultado: true, datos: ajustes})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      })
+    }
+  }
 
   function moverStockPorAjuste(req, res) {
     const token = req.headers['x-access-token'];

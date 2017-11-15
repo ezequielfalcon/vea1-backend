@@ -47,12 +47,15 @@ module.exports = function (db) {
                       'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [req.body.id_producto, req.body.cantidad, decoded.cliente])
                       .then(nuevoStockAjuste => {
                         return t.none('INSERT INTO stock_por_ajuste (id_ajuste, id_stock) VALUES ($1, $2);',
-                          [nuevoIdAjuste, nuevoStockAjuste])
+                          [nuevoIdAjuste.id, nuevoStockAjuste.id])
+                          .then(() => {
+                            return nuevoIdAjuste
+                          })
                       })
                   })
               })
-                .then(() => {
-                  res.status(200).end();
+                .then(idAjuste => {
+                  res.json({resultado: true, id: idAjuste.id});
                 })
                 .catch(err => {
                   console.error(err);

@@ -124,6 +124,7 @@ app.delete('/stock/remitos/:id', stock.borrarRemito);
 app.get('/stock', stock.verStockProductos);
 app.get('/stock/ajustes', stock.verAjustes);
 app.post('/stock/ajustes', stock.nuevoAjuste);
+app.post('/stock/ajuste-unico', stock.nuevoAjusteUnico);
 app.put('/stock/ajustes/:id', stock.moverStockPorAjuste);
 
 //#####################################################################################

@@ -3,11 +3,6 @@ const jwt = require('jsonwebtoken');
 module.exports = function (db) {
   const module = {};
 
-  // remitos
-  
-
-  // stock
-
   module.verStockProductos = verStockProductos;
   module.nuevoAjuste = nuevoAjuste;
   module.moverStockPorAjuste = moverStockPorAjuste;

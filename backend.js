@@ -23,6 +23,7 @@ const usuariosAdmin = require('./admin/usuarios')(db);
 const productos = require('./sistema/productos')(db);
 const proveedores = require('./sistema/proveedores')(db);
 const stock = require('./sistema/stock')(db);
+const remitos = require('./sistema/remitos')(db);
 const usuarios = require('./sistema/usuarios')(db);
 
 app.use((req, res, next) => {
@@ -109,16 +110,16 @@ app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
 //remitos
-app.get('/stock/remitos/historial/:id', stock.historialRemitos);
-app.post('/stock/remitos', stock.recepcionRemito);
-app.get('/stock/remitos', stock.consultaRemitos);
-app.get('/stock/remitos/:id', stock.verRemitoParaCarga);
-app.put('/stock/remitos/:id_remito', stock.confirmarRemito);
-app.put('/stock/remitos/cerrar/:id', stock.cerrarRemito);
-app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
-app.post('/stock/remitos/productos', stock.agregarProductoRemito);
-app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);
-app.delete('/stock/remitos/:id', stock.borrarRemito);
+app.get('/stock/remitos/historial/:id', remitos.historialRemitos);
+app.post('/stock/remitos', remitos.recepcionRemito);
+app.get('/stock/remitos', remitos.consultaRemitos);
+app.get('/stock/remitos/:id', remitos.verRemitoParaCarga);
+app.put('/stock/remitos/:id_remito', remitos.confirmarRemito);
+app.put('/stock/remitos/cerrar/:id', remitos.cerrarRemito);
+app.get('/stock/remitos/productos/:id_remito', remitos.verProductosPorRemito);
+app.post('/stock/remitos/productos', remitos.agregarProductoRemito);
+app.delete('/stock/remitos/productos/:id_remito/:id_producto', remitos.quitarProductoRemito);
+app.delete('/stock/remitos/:id', remitos.borrarRemito);
 
 //stock
 app.get('/stock', stock.verStockProductos);

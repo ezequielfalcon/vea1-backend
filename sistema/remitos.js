@@ -376,7 +376,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
             if (req.params.id) {
-              db.oneOrNone('SELECT id FROM remitos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id_remito, decoded.cliente])
+              db.oneOrNone('SELECT id FROM remitos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id, decoded.cliente])
                 .then(remitoExiste => {
                   if (remitoExiste) {
                     db.manyOrNone('SELECT estado_por_remito.fecha, estados_remito.nombre, estado_por_remito.usuario ' +

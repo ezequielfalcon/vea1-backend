@@ -117,7 +117,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
             if(req.params.id_producto && req.body.precio) {
-              db.none('INSERT INTO precios_por_producto (id_producto, precio, fecha, id_cliente_int) ' +
+              db.one('INSERT INTO precios_por_producto (id_producto, precio, fecha, id_cliente_int) ' +
                 'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [req.params.id_producto, req.body.precio, decoded.cliente])
                 .then(nuevoPrecio => {
                   res.json({resultado: true, id: nuevoPrecio.id})

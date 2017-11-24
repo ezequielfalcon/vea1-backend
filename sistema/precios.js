@@ -77,10 +77,10 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
-            if(req.params.id) {
+            if(req.params.id_producto) {
               db.manyOrNone('SELECT id, id_producto, precio, fecha FROM precios_por_producto ' +
                 'WHERE id_producto = $1 AND id_cliente_int = $2 ORDER BY fecha DESC;'
-                , [req.params.id, decoded.cliente])
+                , [req.params.id_producto, decoded.cliente])
                 .then(precios => {
                   res.json({resultado: true, datos: precios})
                 })
@@ -116,9 +116,9 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin')) {
-            if(req.body.id_producto && req.body.precio) {
+            if(req.params.id_producto && req.body.precio) {
               db.none('INSERT INTO precios_por_producto (id_producto, precio, fecha, id_cliente_int) ' +
-                'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [req.body.id_producto, req.body.precio, decoded.cliente])
+                'VALUES ($1, $2, current_timestamp, $3) RETURNING id;', [req.params.id_producto, req.body.precio, decoded.cliente])
                 .then(nuevoPrecio => {
                   res.json({resultado: true, id: nuevoPrecio.id})
                 })

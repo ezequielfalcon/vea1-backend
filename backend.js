@@ -25,6 +25,7 @@ const proveedores = require('./sistema/proveedores')(db);
 const stock = require('./sistema/stock')(db);
 const remitos = require('./sistema/remitos')(db);
 const usuarios = require('./sistema/usuarios')(db);
+const precios = require('./sistema/precios')(db);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -127,6 +128,11 @@ app.get('/stock/ajustes', stock.verAjustes);
 app.post('/stock/ajustes', stock.nuevoAjuste);
 app.post('/stock/ajuste-unico', stock.nuevoAjusteUnico);
 app.put('/stock/ajustes/:id', stock.moverStockPorAjuste);
+
+//precios
+app.get('/productos/precios', precios.productosConPrecios);
+app.put('/productos/precios/:id_producto', precios.nuevoPrecio);
+app.get('/productos/precios/:id_producto', precios.verPreciosProducto);
 
 //#####################################################################################
 

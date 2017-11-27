@@ -756,9 +756,10 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.params.id && req.body.nombre && req.body.stock_minimo && req.body.codigo
+            if (req.params.id && req.body.nombre && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;
+              const stock_minimo = req.body.stock_minimo || 0;
               db.oneOrNone('SELECT nombre, id, codigo FROM productos WHERE codigo = $1 AND id_cliente_int = $2 LIMIT 1;', [req.body.codigo, decoded.cliente])
                 .then(codigoDb => {
                   if (codigoDb)
@@ -770,7 +771,7 @@ module.exports = function (db) {
                     else {
                       db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
                                                 'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
-                        ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
+                        ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
                         , req.body.id_unidad, marca, req.params.id, decoded.cliente])
                         .then(() => {
                           res.json({resultado: true})
@@ -792,7 +793,7 @@ module.exports = function (db) {
                   else {
                     db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
                                             'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
-                      ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
+                      ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
                       , req.body.id_unidad, marca, req.params.id, decoded.cliente])
                       .then(() => {
                         res.json({resultado: true})
@@ -905,9 +906,9 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.nombre && req.body.stock_minimo
-                            && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
+            if (req.body.nombre && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;
+              const stock_minimo = req.body.stock_minimo || 0;
               db.one('SELECT nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
                 ,[req.body.id_categoria, decoded.cliente])
                 .then(categoria => {
@@ -924,7 +925,7 @@ module.exports = function (db) {
                       else {
                         db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
                                                     'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
-                          ,[req.body.nombre, req.body.stock_minimo, req.body.iva, codigo,
+                          ,[req.body.nombre, stock_minimo, req.body.iva, codigo,
                           req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
                           .then(nuevoP => {
                             res.json({resultado: true, id: nuevoP.id, nuevoCodigo: codigo})
@@ -988,9 +989,10 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('stock') || roles.includes('admin')) {
-            if (req.body.nombre && req.body.stock_minimo && req.body.codigo
+            if (req.body.nombre && req.body.codigo
                             && req.body.iva && req.body.id_categoria && req.body.id_unidad) {
               const marca = req.body.id_marca || null;
+              const stock_minimo = req.body.stock_minimo || 0;
               db.oneOrNone('SELECT nombre FROM productos WHERE codigo = $1 AND id_cliente_int = $2;', [req.body.codigo, decoded.cliente])
                 .then(codigoDb => {
                   if (codigoDb) {
@@ -999,7 +1001,7 @@ module.exports = function (db) {
                   else {
                     db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
                                             'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
-                      ,[req.body.nombre, req.body.stock_minimo, req.body.iva, req.body.codigo,
+                      ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo,
                       req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
                       .then(nuevoP => {
                         res.json({resultado: true, id: nuevoP.id})

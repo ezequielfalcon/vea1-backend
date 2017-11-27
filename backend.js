@@ -23,7 +23,9 @@ const usuariosAdmin = require('./admin/usuarios')(db);
 const productos = require('./sistema/productos')(db);
 const proveedores = require('./sistema/proveedores')(db);
 const stock = require('./sistema/stock')(db);
+const remitos = require('./sistema/remitos')(db);
 const usuarios = require('./sistema/usuarios')(db);
+const precios = require('./sistema/precios')(db);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -108,17 +110,29 @@ app.get('/proveedores/:id', proveedores.verProveedores);
 app.put('/proveedores/:id', proveedores.modificarProveedor);
 app.delete('/proveedores/:id', proveedores.borrarProveedor);
 
-//stock
-app.get('/stock/remitos/recibidos', stock.remitosRecibidos);
-app.get('/stock/remitos/en-carga', stock.remitosEnCarga);
-app.get('/stock/remitos/historial/:id', stock.historialRemitos);
+//remitos
+app.get('/stock/remitos/historial/:id', remitos.historialRemitos);
+app.post('/stock/remitos', remitos.recepcionRemito);
+app.get('/stock/remitos', remitos.consultaRemitos);
+app.get('/stock/remitos/:id', remitos.verRemitoParaCarga);
+app.put('/stock/remitos/:id_remito', remitos.confirmarRemito);
+app.put('/stock/remitos/cerrar/:id', remitos.cerrarRemito);
+app.get('/stock/remitos/productos/:id_remito', remitos.verProductosPorRemito);
+app.post('/stock/remitos/productos', remitos.agregarProductoRemito);
+app.delete('/stock/remitos/productos/:id_remito/:id_producto', remitos.quitarProductoRemito);
+app.delete('/stock/remitos/:id', remitos.borrarRemito);
 
-app.post('/stock/remitos/recibidos', stock.recepcionRemito);
-app.get('/stock/remitos/para-carga/:id', stock.verRemitoParaCarga);
-app.put('/stock/remitos/confirmar/:id_remito', stock.confirmarRemito);
-app.get('/stock/remitos/productos/:id_remito', stock.verProductosPorRemito);
-app.post('/stock/remitos/productos', stock.agregarProductoRemito);
-app.delete('/stock/remitos/productos/:id_remito/:id_producto', stock.quitarProductoRemito);
+//stock
+app.get('/stock', stock.verStockProductos);
+app.get('/stock/ajustes', stock.verAjustes);
+app.post('/stock/ajustes', stock.nuevoAjuste);
+app.post('/stock/ajuste-unico', stock.nuevoAjusteUnico);
+app.put('/stock/ajustes/:id', stock.moverStockPorAjuste);
+
+//precios
+app.get('/productos/precios', precios.productosConPrecios);
+app.put('/productos/precios/:id_producto', precios.nuevoPrecio);
+app.get('/productos/precios/:id_producto', precios.verPreciosProducto);
 
 //#####################################################################################
 

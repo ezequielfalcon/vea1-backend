@@ -671,7 +671,7 @@ module.exports = function (db) {
               })
           }
           else {
-            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
+            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1 ORDER BY nombre ASC;', decoded.cliente)
               .then(categorias => {
                 res.json({resultado: true, datos: categorias})
               })

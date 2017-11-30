@@ -655,7 +655,7 @@ module.exports = function (db) {
         }
         else {
           if (req.params.id) {
-            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
+            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2 ORDER BY nombre;'
               , [req.params.id, decoded.cliente])
               .then(categoria => {
                 if (categoria) {

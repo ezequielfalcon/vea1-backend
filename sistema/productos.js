@@ -655,7 +655,7 @@ module.exports = function (db) {
         }
         else {
           if (req.params.id) {
-            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2 ORDER BY nombre ASC;'
+            db.oneOrNone('SELECT id, nombre FROM categorias WHERE id = $1 AND id_cliente_int = $2;'
               , [req.params.id, decoded.cliente])
               .then(categoria => {
                 if (categoria) {
@@ -671,7 +671,7 @@ module.exports = function (db) {
               })
           }
           else {
-            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1;', decoded.cliente)
+            db.manyOrNone('SELECT id, nombre FROM categorias WHERE id_cliente_int = $1 ORDER BY nombre ASC;', decoded.cliente)
               .then(categorias => {
                 res.json({resultado: true, datos: categorias})
               })

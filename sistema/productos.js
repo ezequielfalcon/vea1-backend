@@ -774,7 +774,7 @@ module.exports = function (db) {
                         'id_categoria = $5, id_unidad = $6, id_marca = $7, es_ingrediente = $8 ' +
                         'WHERE id = $9 AND id_cliente_int = $10;'
                         ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
-                        , req.body.id_unidad, marca, req.params.es_ingrediente || false, req.params.id, decoded.cliente])
+                        , req.body.id_unidad, marca, req.body.es_ingrediente || false, req.params.id, decoded.cliente])
                         .then(() => {
                           res.json({resultado: true})
                         })
@@ -797,7 +797,7 @@ module.exports = function (db) {
                       'id_categoria = $5, id_unidad = $6, id_marca = $7, es_ingrediente = $8 ' +
                       'WHERE id = $9 AND id_cliente_int = $10;'
                       ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
-                      , req.body.id_unidad, marca, req.params.es_ingrediente || false, req.params.id, decoded.cliente])
+                      , req.body.id_unidad, marca, req.body.es_ingrediente || false, req.params.id, decoded.cliente])
                       .then(() => {
                         res.json({resultado: true})
                       })

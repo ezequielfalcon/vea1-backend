@@ -5,6 +5,40 @@ module.exports = function (db) {
 
   module.crearMenu = crearMenu;
   module.verMenus = verMenus;
+  module.verIngredientes = verIngredientes;
+
+  function verIngredientes(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, categorias.nombre FROM productos ' +
+                        'INNER JOIN categorias ON productos.id_categoria = categorias.id  ' +
+                        'WHERE productos.id_cliente_int = $1 and productos.es_ingrediente = true ORDER BY productos.id DESC;', decoded.cliente)
+            .then(ingredientes => {
+              res.json({resultado: true, datos: ingredientes})
+            })
+            .catch(err => {
+              console.error(err);
+              res.status(500).json({resultado: false, mensaje: err.detail})
+            })
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verMenus(req, res) {
     const token = req.headers['x-access-token'];

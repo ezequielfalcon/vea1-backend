@@ -136,8 +136,9 @@ app.put('/productos/precios/:id_producto', precios.nuevoPrecio);
 app.get('/productos/precios/:id_producto', precios.verPreciosProducto);
 
 //cocina
-app.get('/productos/menus', cocina.verMenus);
-app.post('/productos/menus', cocina.crearMenu);
+app.get('/cocina/menus', cocina.verMenus);
+app.post('/cocina/menus', cocina.crearMenu);
+app.get('/cocina/ingredientes', cocina.verIngredientes);
 
 //#####################################################################################
 

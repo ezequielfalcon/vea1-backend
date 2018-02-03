@@ -22,19 +22,22 @@ module.exports = function (db) {
           });
         }
         else {
-          db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, categorias.nombre FROM productos ' +
-                        'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
+          if (req.params.id_menu) {
+            db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, productos_por_menu.cantidad FROM productos ' +
                         'INNER JOIN productos_por_menu ON productos.id = productos_por_menu.id_producto ' +
                         'INNER JOIN menus ON productos_por_menu.id_menu = menus.id  ' +
-                        'WHERE menus.id = $1 AND productos.id_cliente_int = $2 and productos.es_ingrediente = true ORDER BY productos.id DESC;',
-          [req.params.id_menu, decoded.cliente])
-            .then(ingredientes => {
-              res.json({resultado: true, datos: ingredientes})
-            })
-            .catch(err => {
-              console.error(err);
-              res.status(500).json({resultado: false, mensaje: err})
-            })
+                        'WHERE menus.id = $1 AND menus.id_cliente_int = $2 ORDER BY productos.id DESC;',
+            [req.params.id_menu, decoded.cliente])
+              .then(ingredientes => {
+                res.json({resultado: true, datos: ingredientes})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err})
+              })
+          } else {
+            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+          }
         }
       });
     }

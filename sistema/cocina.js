@@ -140,20 +140,18 @@ module.exports = function (db) {
                   if (idExiste) {
                     res.status(400).json({resultado: false, mensaje: 'Ya existe un menú con ese nombre!'})
                   } else {
-                    db.one('INSERT INTO menus (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;'[req.body.nombre, decoded.cliente])
+                    db.one('INSERT INTO menus (nombre, id_cliente_int) VALUES ($1, $2) RETURNING id;', [req.body.nombre, decoded.cliente])
                       .then(nuevoMenu => {
                         res.json({resultado: true, id: nuevoMenu.id})
                       })
                       .catch( err => {
                         console.error(err);
-                        console.error('error en insert ' + req.body.nombre + decoded.cliente);
                         res.status(500).json({resultado: false, mensaje: err})
                       });
                   }
                 })
                 .catch( err => {
                   console.error(err);
-                  console.error('error en select ' + req.body.nombre + decoded.cliente);
                   res.status(500).json({resultado: false, mensaje: err})
                 });
             } else {

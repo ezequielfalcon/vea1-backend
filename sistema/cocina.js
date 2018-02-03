@@ -7,6 +7,43 @@ module.exports = function (db) {
   module.verMenus = verMenus;
   module.verIngredientes = verIngredientes;
   module.verMenu = verMenu;
+  module.agregarIngredienteMenu = agregarIngredienteMenu;
+
+  function agregarIngredienteMenu(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          if (req.params.id_menu && req.params.id_producto) {
+            db.none('INSERT INTO productos_por_menu (id_menu, id_producto) VALUES ($1, $2);'
+              ,[req.params.id_menu, req.body.id_producto])
+              .then(() => {
+                res.json({resultado: true})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err})
+              })
+          } else {
+            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+          }
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verMenu(req, res) {
     const token = req.headers['x-access-token'];

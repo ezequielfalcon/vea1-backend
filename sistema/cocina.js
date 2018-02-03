@@ -146,12 +146,14 @@ module.exports = function (db) {
                       })
                       .catch( err => {
                         console.error(err);
+                        console.error('error en insert ' + req.body.nombre + decoded.cliente);
                         res.status(500).json({resultado: false, mensaje: err})
                       });
                   }
                 })
                 .catch( err => {
                   console.error(err);
+                  console.error('error en select ' + req.body.nombre + decoded.cliente);
                   res.status(500).json({resultado: false, mensaje: err})
                 });
             } else {

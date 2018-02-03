@@ -61,7 +61,7 @@ module.exports = function (db) {
           });
         }
         else {
-          if (req.params.id_menu && req.params.id_producto) {
+          if (req.params.id_menu && req.body.id_producto) {
             db.none('INSERT INTO productos_por_menu (id_menu, id_producto) VALUES ($1, $2);'
               ,[req.params.id_menu, req.body.id_producto])
               .then(() => {

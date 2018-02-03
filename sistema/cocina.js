@@ -6,6 +6,47 @@ module.exports = function (db) {
   module.crearMenu = crearMenu;
   module.verMenus = verMenus;
   module.verIngredientes = verIngredientes;
+  module.verMenu = verMenu;
+
+  function verMenu(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          if (req.params.id) {
+            db.oneOrNone('SELECT nombre FROM menus WHERE id = $1 AND id_cliente_int = $2;'
+              , [req.params.id, decoded.cliente])
+              .then(menu => {
+                if (menu) {
+                  res.json({datos: menu})
+                } else {
+                  res.status(404).json({resultado: false, mensaje: 'No se encontró el menú!'})
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err.detail})
+              })
+          } else {
+            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+          }
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verIngredientes(req, res) {
     const token = req.headers['x-access-token'];

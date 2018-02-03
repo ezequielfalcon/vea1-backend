@@ -23,8 +23,8 @@ module.exports = function (db) {
         }
         else {
           if (req.params.id_menu) {
-            db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, productos_por_menu.cantidad FROM productos ' +
-                        'INNER JOIN productos_por_menu ON productos.id = productos_por_menu.id_producto ' +
+            db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, productos_por_menu.cantidad FROM productos_por_menu ' +
+                        'INNER JOIN productos ON productos.id = productos_por_menu.id_producto ' +
                         'INNER JOIN menus ON productos_por_menu.id_menu = menus.id  ' +
                         'WHERE menus.id = $1 AND menus.id_cliente_int = $2 ORDER BY productos.id DESC;',
             [req.params.id_menu, decoded.cliente])
@@ -137,7 +137,7 @@ module.exports = function (db) {
           });
         }
         else {
-          db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, categorias.nombre FROM productos ' +
+          db.manyOrNone('SELECT productos.id id, productos.nombre nombre, productos.codigo codigo, categorias.nombre categoria FROM productos ' +
                         'INNER JOIN categorias ON productos.id_categoria = categorias.id  ' +
                         'WHERE productos.id_cliente_int = $1 and productos.es_ingrediente = true ORDER BY productos.id DESC;', decoded.cliente)
             .then(ingredientes => {

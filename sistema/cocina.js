@@ -32,7 +32,7 @@ module.exports = function (db) {
               })
               .catch(err => {
                 console.error(err);
-                res.status(500).json({resultado: false, mensaje: err.detail})
+                res.status(500).json({resultado: false, mensaje: err})
               })
           } else {
             res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
@@ -68,7 +68,7 @@ module.exports = function (db) {
             })
             .catch(err => {
               console.error(err);
-              res.status(500).json({resultado: false, mensaje: err.detail})
+              res.status(500).json({resultado: false, mensaje: err})
             })
         }
       });
@@ -100,8 +100,8 @@ module.exports = function (db) {
                 res.json({resultado: true, datos: menus})
               })
               .catch( err => {
-                console.error(err.detail);
-                res.status(500).json({resultado: false, mensaje: err.detail})
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err})
               });
           }
           else {
@@ -145,14 +145,14 @@ module.exports = function (db) {
                         res.json({resultado: true, id: nuevoMenu.id})
                       })
                       .catch( err => {
-                        console.error(err.detail);
-                        res.status(500).json({resultado: false, mensaje: err.detail})
+                        console.error(err);
+                        res.status(500).json({resultado: false, mensaje: err})
                       });
                   }
                 })
                 .catch( err => {
-                  console.error(err.detail);
-                  res.status(500).json({resultado: false, mensaje: err.detail})
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err})
                 });
             } else {
               res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})

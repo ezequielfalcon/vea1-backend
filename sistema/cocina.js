@@ -8,6 +8,43 @@ module.exports = function (db) {
   module.verIngredientes = verIngredientes;
   module.verMenu = verMenu;
   module.agregarIngredienteMenu = agregarIngredienteMenu;
+  module.verIngredientesMenu = verIngredientesMenu;
+
+  function verIngredientesMenu(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          db.manyOrNone('SELECT productos.id, productos.nombre, productos.codigo, categorias.nombre FROM productos ' +
+                        'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
+                        'INNER JOIN productos_por_menu ON productos.id = productos_por_menu.id_producto ' +
+                        'INNER JOIN menus ON productos_por_menu.id_menu = menus.id  ' +
+                        'WHERE menus.id = $1 AND productos.id_cliente_int = $2 and productos.es_ingrediente = true ORDER BY productos.id DESC;',
+          [req.params.id_menu, decoded.cliente])
+            .then(ingredientes => {
+              res.json({resultado: true, datos: ingredientes})
+            })
+            .catch(err => {
+              console.error(err);
+              res.status(500).json({resultado: false, mensaje: err})
+            })
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function agregarIngredienteMenu(req, res) {
     const token = req.headers['x-access-token'];

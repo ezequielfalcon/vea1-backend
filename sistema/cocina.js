@@ -21,7 +21,7 @@ module.exports = function (db) {
         }
         else {
           if (req.params.id) {
-            db.oneOrNone('SELECT nombre FROM menus WHERE id = $1 AND id_cliente_int = $2;'
+            db.oneOrNone('SELECT id, nombre FROM menus WHERE id = $1 AND id_cliente_int = $2;'
               , [req.params.id, decoded.cliente])
               .then(menu => {
                 if (menu) {

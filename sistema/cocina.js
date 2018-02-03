@@ -135,7 +135,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('stock')) {
             if (req.body.nombre) {
-              db.oneOrNone('SELECT id FROM menus WHERE nombre = $1 AND id_cliente_int = $2', [req.body.nombre, decoded.cliente])
+              db.oneOrNone('SELECT id FROM menus WHERE nombre = $1 AND id_cliente_int = $2;', [req.body.nombre, decoded.cliente])
                 .then(idExiste => {
                   if (idExiste) {
                     res.status(400).json({resultado: false, mensaje: 'Ya existe un menú con ese nombre!'})

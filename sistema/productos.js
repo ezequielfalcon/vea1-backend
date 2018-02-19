@@ -91,12 +91,13 @@ module.exports = function (db) {
           });
         }
         else {
-          db.manyOrNone('SELECT productos.id, productos.nombre, productos.stock_minimo, productos.iva, ' +
-                        'productos.codigo, categorias.nombre categoria, unidades.nombre unidad ' +
-                        'FROM productos ' +
-                        'INNER JOIN categorias ON productos.id_categoria = categorias.id ' +
-                        'INNER JOIN unidades ON productos.id_unidad = unidades.id ' +
-                        'WHERE productos.id_cliente_int = $1 ORDER BY productos.id DESC;', decoded.cliente)
+          db.manyOrNone('SELECT p.id, p.nombre, p.stock_minimo, p.iva, ' +
+                        'p.codigo, c.nombre categoria, ' +
+                        'u.nombre unidad, p.es_ingrediente es_ingrediente, p.es_adicional es_adicional ' +
+                        'FROM productos p ' +
+                        'INNER JOIN categorias c ON p.id_categoria = c.id ' +
+                        'INNER JOIN unidades u ON p.id_unidad = u.id ' +
+                        'WHERE p.id_cliente_int = $1 ORDER BY p.id DESC;', decoded.cliente)
             .then(productos => {
               res.json({resultado: true, datos: productos})
             })
@@ -770,9 +771,10 @@ module.exports = function (db) {
                     }
                     else {
                       db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
-                                                'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
+                        'id_categoria = $5, id_unidad = $6, id_marca = $7, es_ingrediente = $8, es_adicional = $9 ' +
+                        'WHERE id = $10 AND id_cliente_int = $11;'
                         ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
-                        , req.body.id_unidad, marca, req.params.id, decoded.cliente])
+                        , req.body.id_unidad, marca, req.body.es_ingrediente || false, req.body.es_adicional || false, req.params.id, decoded.cliente])
                         .then(() => {
                           res.json({resultado: true})
                         })
@@ -792,9 +794,10 @@ module.exports = function (db) {
                   }
                   else {
                     db.none('UPDATE productos SET nombre = $1, stock_minimo = $2, iva = $3, codigo = $4, ' +
-                                            'id_categoria = $5, id_unidad = $6, id_marca = $7 WHERE id = $8 AND id_cliente_int = $9;'
+                        'id_categoria = $5, id_unidad = $6, id_marca = $7, es_ingrediente = $8, es_adicional = $9 ' +
+                        'WHERE id = $10 AND id_cliente_int = $11;'
                       ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo, req.body.id_categoria
-                      , req.body.id_unidad, marca, req.params.id, decoded.cliente])
+                      , req.body.id_unidad, marca, req.body.es_ingrediente || false, req.body.es_adicional || false, req.params.id, decoded.cliente])
                       .then(() => {
                         res.json({resultado: true})
                       })
@@ -847,8 +850,8 @@ module.exports = function (db) {
         }
         else {
           if (req.params.id) {
-            db.oneOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca ' +
-                            'FROM productos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id, decoded.cliente])
+            db.oneOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca, es_ingrediente,' +
+                            ' es_adicional FROM productos WHERE id = $1 AND id_cliente_int = $2;', [req.params.id, decoded.cliente])
               .then(producto => {
                 if (producto) {
                   res.json({resultado: true, datos: producto})
@@ -863,7 +866,7 @@ module.exports = function (db) {
               })
           }
           else {
-            db.manyOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca ' +
+            db.manyOrNone('SELECT id, nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_marca, es_ingrediente, es_adicional ' +
                             'FROM productos WHERE id_cliente_int = $1 ORDER BY nombre ASC LIMIT 50;', decoded.cliente)
               .then(productos => {
                 res.json({resultado: true, datos: productos})
@@ -923,10 +926,10 @@ module.exports = function (db) {
                         res.status(500).json({resultado: false, mensaje: 'Error de generación de código, intente nuevamente'})
                       }
                       else {
-                        db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
-                                                    'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
+                        db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca, es_ingrediente, es_adicional) ' +
+                                                    'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;'
                           ,[req.body.nombre, stock_minimo, req.body.iva, codigo,
-                          req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
+                          req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca, req.body.es_ingrediente || false, req.body.es_adicional || false])
                           .then(nuevoP => {
                             res.json({resultado: true, id: nuevoP.id, nuevoCodigo: codigo})
                           })
@@ -999,10 +1002,10 @@ module.exports = function (db) {
                     res.status(400).json({resultado: false, mensaje: 'Ya existe un producto con ese código: ' + codigoDb.nombre})
                   }
                   else {
-                    db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca) ' +
-                                            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;'
+                    db.one('INSERT INTO productos (nombre, stock_minimo, iva, codigo, id_categoria, id_unidad, id_cliente_int, id_marca, es_ingrediente, es_adicional) ' +
+                                            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;'
                       ,[req.body.nombre, stock_minimo, req.body.iva, req.body.codigo,
-                      req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca])
+                      req.body.id_categoria, req.body.id_unidad, decoded.cliente, marca, req.body.es_ingrediente || false, req.body.es_adicional || false])
                       .then(nuevoP => {
                         res.json({resultado: true, id: nuevoP.id})
                       })

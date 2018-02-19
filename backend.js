@@ -26,6 +26,7 @@ const stock = require('./sistema/stock')(db);
 const remitos = require('./sistema/remitos')(db);
 const usuarios = require('./sistema/usuarios')(db);
 const precios = require('./sistema/precios')(db);
+const cocina = require('./sistema/cocina')(db);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -133,6 +134,14 @@ app.put('/stock/ajustes/:id', stock.moverStockPorAjuste);
 app.get('/productos/precios', precios.productosConPrecios);
 app.put('/productos/precios/:id_producto', precios.nuevoPrecio);
 app.get('/productos/precios/:id_producto', precios.verPreciosProducto);
+
+//cocina
+app.get('/cocina/menus', cocina.verMenus);
+app.get('/cocina/menus/:id', cocina.verMenu);
+app.put('/cocina/menus/agregar/:id_menu', cocina.agregarIngredienteMenu);
+app.post('/cocina/menus', cocina.crearMenu);
+app.get('/cocina/ingredientes', cocina.verIngredientes);
+app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
 
 //#####################################################################################
 

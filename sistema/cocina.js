@@ -10,6 +10,188 @@ module.exports = function (db) {
   module.agregarIngredienteMenu = agregarIngredienteMenu;
   module.verIngredientesMenu = verIngredientesMenu;
   module.verAdicionales = verAdicionales;
+  module.crearPedido = crearPedido;
+  module.verPedido = verPedido;
+  module.agregarMenuPedido = agregarMenuPedido;
+  module.adicionalMenuPedido = adicionalMenuPedido;
+
+  function adicionalMenuPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id_pedido && req.body.id_menu && req.body.id_producto && req.body.cantidad) {
+              db.none('INSERT INTO adicionales_menu_pedido (id_producto, id_menu, id_pedido, cantidad) VALUES ($1, $2, $3, $4);'
+                ,[req.body.id_producto, req.body.id_menu, req.params.id_pedido, req.body.cantidad])
+                .then(() => {
+                  res.json({mensaje: 'Adicional agregado!'})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err})
+                })
+            } else {
+              res.status(400).json({mensaje: 'Falta ID de pedido, de menú o de producto!'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
+
+  function agregarMenuPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id && req.body.id_menu, req.body.cantidad) {
+              db.none('INSERT INTO menus_por_pedido (id_pedido, id_menu, cantidad) ($1, $2, $3);',
+                [req.params.id, req.body.id_menu, req.body.cantidad])
+                .then(() => {
+                  res.json({mensaje: 'Menú agregado al pedido ' + req.params.id_pedido})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err})
+                })
+            } else {
+              res.status(400).json({mensaje: 'Falta ID de pedido o menú!'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
+
+  function verPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id) {
+              db.oneOrNone('SELECT fecha, nombre, observacion WHERE id = $1 AND id_cliente_int $2;'
+                ,[req.params.id, decoded.cliente])
+                .then(pedido => {
+                  if (pedido) {
+                    res.json({datos: pedido})
+                  } else {
+                    res.status(404).json({mensaje: 'No se encuentra el pedido!'})
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err})
+                })
+            } else {
+              res.status(400).json({mensaje: 'Falta ID!'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
+
+  function crearPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            const nombre = req.body.nombre || null;
+            const observaciones = req.body.observaciones || null;
+            db.one('INSERT INTO pedidos (fecha, id_cliente_int, nombre, observacion) ' +
+            'VALUES (current_timestamp, $1, $2, $3) RETURNING id;', [decoded.cliente, nombre, observaciones])
+              .then(nuevoPedido => {
+                res.json({id: nuevoPedido.id})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err})
+              })
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verAdicionales(req, res) {
     const token = req.headers['x-access-token'];

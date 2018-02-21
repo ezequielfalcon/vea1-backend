@@ -142,6 +142,10 @@ app.put('/cocina/menus/agregar/:id_menu', cocina.agregarIngredienteMenu);
 app.post('/cocina/menus', cocina.crearMenu);
 app.get('/cocina/ingredientes', cocina.verIngredientes);
 app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
+app.post('/cocina/pedidos', cocina.crearPedido);
+app.get('/cocina/pedidos/:id', cocina.verPedido);
+app.put('/cocina/pedidos/:id', cocina.agregarMenuPedido);
+app.put('/cocina/pedidos/adicional/:id_pedido', cocina.adicionalMenuPedido);
 
 //#####################################################################################
 

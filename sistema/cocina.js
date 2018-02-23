@@ -14,6 +14,86 @@ module.exports = function (db) {
   module.verPedido = verPedido;
   module.agregarMenuPedido = agregarMenuPedido;
   module.adicionalMenuPedido = adicionalMenuPedido;
+  module.verPedidosPendientes = verPedidosPendientes;
+  module.verPedidosCerrados = verPedidosCerrados;
+
+  function verPedidosCerrados(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            db.manyOrNone('SELECT p.id, p.fecha, p.nombre, p.observacion FROM pedidos p WHERE p.id_cliente_int = $1 AND (SELECT ep.id_estado FROM estados_por_pedido ep WHERE ep.id_pedido = p.id ORDER BY ep.fecha DESC LIMIT 1) = 2;', decoded.cliente)
+              .then(pedidosCerrados => {
+                res.json({datos: pedidosCerrados})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({mensaje: err})
+              })
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
+
+  function verPedidosPendientes(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            db.manyOrNone('SELECT p.id, p.fecha, p.nombre, p.observacion FROM pedidos p WHERE p.id_cliente_int = $1 AND (SELECT ep.id_estado FROM estados_por_pedido ep WHERE ep.id_pedido = p.id ORDER BY ep.fecha DESC LIMIT 1) = 1;', decoded.cliente)
+              .then(pedidosPendientes => {
+                res.json({datos: pedidosPendientes})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({mensaje: err})
+              })
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function adicionalMenuPedido(req, res) {
     const token = req.headers['x-access-token'];
@@ -74,7 +154,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id && req.body.id_menu, req.body.cantidad) {
-              db.none('INSERT INTO menus_por_pedido (id_pedido, id_menu, cantidad) ($1, $2, $3);',
+              db.none('INSERT INTO menus_por_pedido (id_pedido, id_menu, cantidad) VALUES ($1, $2, $3);',
                 [req.params.id, req.body.id_menu, req.body.cantidad])
                 .then(() => {
                   res.json({mensaje: 'Menú agregado al pedido ' + req.params.id_pedido})
@@ -118,11 +198,15 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id) {
-              db.oneOrNone('SELECT fecha, nombre, observacion WHERE id = $1 AND id_cliente_int $2;'
+              db.oneOrNone('SELECT p.fecha, p.nombre, p.observacion, (SELECT ep.id_estado FROM estados_por_pedido ep WHERE ep.id_pedido = $1 ORDER BY ep.fecha DESC LIMIT 1) id_estado FROM pedidos p WHERE p.id = $1 AND p.id_cliente_int = $2;'
                 ,[req.params.id, decoded.cliente])
                 .then(pedido => {
                   if (pedido) {
-                    res.json({datos: pedido})
+                    if (pedido.id_estado === 1) {
+                      res.json({datos: pedido})
+                    } else {
+                      res.status(400).json({mensaje: 'El pedido se encuentra finalizado!'})
+                    }
                   } else {
                     res.status(404).json({mensaje: 'No se encuentra el pedido!'})
                   }
@@ -170,7 +254,14 @@ module.exports = function (db) {
             db.one('INSERT INTO pedidos (fecha, id_cliente_int, nombre, observacion) ' +
             'VALUES (current_timestamp, $1, $2, $3) RETURNING id;', [decoded.cliente, nombre, observaciones])
               .then(nuevoPedido => {
-                res.json({id: nuevoPedido.id})
+                db.none('INSERT INTO estados_por_pedido (id_pedido, id_estado) VALUES ($1, $2);', [nuevoPedido.id, 1])
+                  .then(() => {
+                    res.json({id: nuevoPedido.id})
+                  })
+                  .catch(err => {
+                    console.error(err);
+                    res.status(500).json({resultado: false, mensaje: err})
+                  })
               })
               .catch(err => {
                 console.error(err);

@@ -138,17 +138,10 @@ app.get('/productos/precios/:id_producto', precios.verPreciosProducto);
 //cocina
 app.get('/cocina/menus', cocina.verMenus);
 app.get('/cocina/menus/:id', cocina.verMenu);
-app.put('/cocina/menus/ingredientes/:id_menu', cocina.agregarIngredienteMenu);
-app.delete('/cocina/menus/ingredientes/:id_menu/:id_producto', cocina.borrarIngredienteMenu)
+app.put('/cocina/menus/agregar/:id_menu', cocina.agregarIngredienteMenu);
 app.post('/cocina/menus', cocina.crearMenu);
 app.get('/cocina/ingredientes', cocina.verIngredientes);
 app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
-app.get('/cocina/pedidos/pendientes', cocina.verPedidosPendientes);
-app.get('/cocina/pedidos/cerrados', cocina.verPedidosCerrados);
-app.post('/cocina/pedidos', cocina.crearPedido);
-app.get('/cocina/pedidos/:id', cocina.verPedido);
-app.put('/cocina/pedidos/:id', cocina.agregarMenuPedido);
-app.put('/cocina/pedidos/adicional/:id_pedido', cocina.adicionalMenuPedido);
 
 //#####################################################################################
 

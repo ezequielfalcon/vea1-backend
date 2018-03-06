@@ -9,6 +9,7 @@ module.exports = function (db) {
   module.verMenu = verMenu;
   module.agregarIngredienteMenu = agregarIngredienteMenu;
   module.verIngredientesMenu = verIngredientesMenu;
+  module.borrarIngredienteMenu = borrarIngredienteMenu;
   module.verAdicionales = verAdicionales;
   module.crearPedido = crearPedido;
   module.verPedido = verPedido;

@@ -32,7 +32,7 @@ module.exports = function (db) {
         else {
           if (req.params.id_menu && req.params.id_producto) {
             db.none('DELETE FROM productos_por_menu WHERE id_menu = $1 AND id_producto = $2;'
-              ,[req.params.id_menu, req.params.id_producto])
+              ,[req.params.id_menu, req.params.id_producto]) // fix
               .then(() => {
                 res.json({resultado: true})
               })

@@ -8,6 +8,7 @@ module.exports = function (db) {
   module.verIngredientes = verIngredientes;
   module.verMenu = verMenu;
   module.agregarIngredienteMenu = agregarIngredienteMenu;
+  module.borrarIngredienteMenu = borrarIngredienteMenu;
   module.verIngredientesMenu = verIngredientesMenu;
   module.verAdicionales = verAdicionales;
   module.crearPedido = crearPedido;
@@ -16,6 +17,42 @@ module.exports = function (db) {
   module.adicionalMenuPedido = adicionalMenuPedido;
   module.verPedidosPendientes = verPedidosPendientes;
   module.verPedidosCerrados = verPedidosCerrados;
+
+  function borrarIngredienteMenu(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          if (req.params.id_menu && req.params.id_producto) {
+            db.none('DELETE FROM productos_por_menu WHERE id_menu = $1 AND id_producto = $2;'
+              ,[req.params.id_menu, req.params.id_producto])
+              .then(() => {
+                res.json({resultado: true})
+              })
+              .catch(err => {
+                console.error(err);
+                res.status(500).json({resultado: false, mensaje: err})
+              })
+          } else {
+            res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+          }
+        }
+      });
+    }
+    else{
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verPedidosCerrados(req, res) {
     const token = req.headers['x-access-token'];

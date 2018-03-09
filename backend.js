@@ -143,7 +143,13 @@ app.delete('/cocina/menus/ingredientes/:id_menu/:id_producto', cocina.borrarIngr
 app.post('/cocina/menus', cocina.crearMenu);
 app.get('/cocina/ingredientes', cocina.verIngredientes);
 app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
+//pedidos
 app.post('/cocina/menus', cocina.crearPedido);
+app.put('/cocina/pedidos/:id', cocina.actualizarPedido);
+app.get('/cocina/pedidos/pendientes', cocina.verPedidosPendientes);
+app.get('/cocina/pedidos/cerrados', cocina.verPedidosCerrados);
+app.put('/cocina/pedidos/menus/:id', cocina.agregarMenuPedido);
+app.put('/cocina/pedidos/adicionales/:id_pedido', cocina.adicionalMenuPedido);
 
 //#####################################################################################
 

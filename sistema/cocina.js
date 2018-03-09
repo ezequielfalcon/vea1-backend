@@ -339,7 +339,7 @@ module.exports = function (db) {
             db.one('INSERT INTO pedidos (fecha, id_cliente_int, nombre, observacion) ' +
             'VALUES (current_timestamp, $1, $2, $3) RETURNING id;', [decoded.cliente, nombre, observaciones])
               .then(nuevoPedido => {
-                db.none('INSERT INTO estados_por_pedido (id_pedido, id_estado) VALUES ($1, $2);', [nuevoPedido.id, 1])
+                db.none('INSERT INTO estados_por_pedido (id_pedido, id_estado, fecha) VALUES ($1, $2, current_timestamp);', [nuevoPedido.id, 1])
                   .then(() => {
                     res.json({id: nuevoPedido.id})
                   })

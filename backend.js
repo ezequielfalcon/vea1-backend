@@ -144,6 +144,7 @@ app.post('/cocina/menus', cocina.crearMenu);
 app.get('/cocina/ingredientes', cocina.verIngredientes);
 app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
 //pedidos
+app.get('/cocina/pedidos/adicionales', cocina.verAdicionales);
 app.post('/cocina/pedidos', cocina.crearPedido);
 app.get('/cocina/pedidos/:id', cocina.verPedido);
 app.put('/cocina/pedidos/:id', cocina.actualizarPedido);

@@ -8,6 +8,7 @@ module.exports = function (db) {
   module.verIngredientes = verIngredientes;
   module.verMenu = verMenu;
   module.agregarIngredienteMenu = agregarIngredienteMenu;
+  module.borrarIngredienteMenu = borrarIngredienteMenu;
   module.verIngredientesMenu = verIngredientesMenu;
   module.borrarIngredienteMenu = borrarIngredienteMenu;
   module.verAdicionales = verAdicionales;
@@ -17,6 +18,53 @@ module.exports = function (db) {
   module.adicionalMenuPedido = adicionalMenuPedido;
   module.verPedidosPendientes = verPedidosPendientes;
   module.verPedidosCerrados = verPedidosCerrados;
+  module.actualizarPedido = actualizarPedido;
+
+  function actualizarPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        }
+        else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id) {
+              const nombre = req.body.nombre || null;
+              const observaciones = req.body.observaciones || null;
+              db.none('UPDATE pedidos SET nombre = $1, observacion = $2 WHERE id = $3 AND id_cliente_int = $4;',
+                [nombre, observaciones, req.params.id, decoded.cliente])
+                .then(() => {
+                  res.json({mensaje: 'Pedido modificado correctamente!'})
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({resultado: false, mensaje: err})
+                })
+            } else {
+              res.status(400).json({resultado: false, mensaje: 'Faltan parámetros'})
+            }
+          }
+          else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function borrarIngredienteMenu(req, res) {
     const token = req.headers['x-access-token'];

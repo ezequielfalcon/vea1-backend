@@ -150,8 +150,8 @@ app.get('/cocina/pedidos/:id', cocina.verPedido);
 app.put('/cocina/pedidos/:id', cocina.actualizarPedido);
 app.get('/cocina/pedidos/pendientes', cocina.verPedidosPendientes);
 app.get('/cocina/pedidos/cerrados', cocina.verPedidosCerrados);
-app.put('/cocina/pedidos/menus/:id', cocina.agregarMenuPedido);
-app.put('/cocina/pedidos/adicionales/:id_pedido', cocina.adicionalMenuPedido);
+app.put('/cocina/pedidos/menus/:id_pedido', cocina.agregarMenuPedido);
+app.put('/cocina/pedidos/adicionales/:id_menu_pedido', cocina.adicionalMenuPedido);
 
 //#####################################################################################
 

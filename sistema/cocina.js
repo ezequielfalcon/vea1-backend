@@ -320,7 +320,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id) {
-              db.oneOrNone('SELECT p.fecha, p.nombre, p.observacion, (SELECT ep.id_estado FROM estados_por_pedido ep WHERE ep.id_pedido = $1 ORDER BY ep.fecha DESC LIMIT 1) id_estado FROM pedidos p WHERE p.id = $1 AND p.id_cliente_int = $2;'
+              db.oneOrNone('SELECT p.id, p.fecha, p.nombre, p.observacion, (SELECT ep.id_estado FROM estados_por_pedido ep WHERE ep.id_pedido = $1 ORDER BY ep.fecha DESC LIMIT 1) id_estado FROM pedidos p WHERE p.id = $1 AND p.id_cliente_int = $2;'
                 ,[req.params.id, decoded.cliente])
                 .then(pedido => {
                   if (pedido) {

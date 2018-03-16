@@ -35,8 +35,11 @@ module.exports = function (db) {
         else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
-            if (req.params.id_menu) {
-              db.manyOrNone('SELECT m.id, m.nombre FROM ')
+            if (req.params.id_pedido) {
+              db.manyOrNone('SELECT m.id, m.nombre FROM menus m INNER JOIN menus_por_pedido mp ON m.id = mp.id_menu WHERE mp.id_pedido = $1;', req.params.id_pedido)
+                .then(menusPedido => {
+                  res.json({datos: menusPedido})
+                })
             } else {
               res.status(400).json({mensaje: 'Falta parámetro'})
             }

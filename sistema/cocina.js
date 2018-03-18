@@ -19,6 +19,43 @@ module.exports = function (db) {
   module.verPedidosCerrados = verPedidosCerrados;
   module.actualizarPedido = actualizarPedido;
   module.verMenusPedido = verMenusPedido;
+  module.verAdicionalesMenuPedido = verAdicionalesMenuPedido;
+
+  function verAdicionalesMenuPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        } else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id_menu_pedido) {
+              db.manyOrNone('SELECT id_producto FROM adicionales_menu_pedido WHERE id_menu_pedido = $1;', req.params.)
+            } else {
+              res.status(400).json({
+                mensaje: 'Faltan parámetros'
+              })
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verMenusPedido(req, res) {
     const token = req.headers['x-access-token'];

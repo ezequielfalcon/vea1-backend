@@ -35,7 +35,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id_pedido) {
-              db.manyOrNone('SELECT m.id, m.nombre FROM menus m INNER JOIN menus_por_pedido mp ON m.id = mp.id_menu WHERE mp.id_pedido = $1;', req.params.id_pedido)
+              db.manyOrNone('SELECT m.id, mp.id id_menu_pedido, m.nombre FROM menus m INNER JOIN menus_por_pedido mp ON m.id = mp.id_menu WHERE mp.id_pedido = $1;', req.params.id_pedido)
                 .then(menusPedido => {
                   res.json({
                     datos: menusPedido

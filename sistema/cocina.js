@@ -250,7 +250,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id_menu_pedido && req.body.id_producto) {
-              db.none('INSERT INTO adicionales_menu_pedido (id_menu_pedido, id_producto) VALUES ($1, $2);', [req.body.id_menu_pedido, req.body.id_producto])
+              db.none('INSERT INTO adicionales_menu_pedido (id_menu_pedido, id_producto) VALUES ($1, $2);', [req.params.id_menu_pedido, req.body.id_producto])
                 .then(() => {
                   res.json({
                     mensaje: 'Adicional agregado!'

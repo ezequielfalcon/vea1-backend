@@ -299,7 +299,7 @@ module.exports = function (db) {
           if (roles.includes('admin') || roles.includes('caja')) {
             const observaciones = req.body.observaciones || null;
             if (req.params.id_pedido && req.body.id_menu) {
-              db.none('INSERT INTO menus_por_pedido (id_menu, id_pedido, observaciones) VALUES ($1, $2, $3) RETURNING id;', [req.body.id_menu, req.params.id_pedido, observaciones])
+              db.one('INSERT INTO menus_por_pedido (id_menu, id_pedido, observaciones) VALUES ($1, $2, $3) RETURNING id;', [req.body.id_menu, req.params.id_pedido, observaciones])
                 .then((id) => {
                   res.json({
                     mensaje: 'Menú agregado al pedido ' + req.params.id_pedido,

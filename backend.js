@@ -153,6 +153,7 @@ app.get('/cocina/pedidos-cerrados', cocina.verPedidosCerrados);
 app.put('/cocina/pedidos/menus/:id_pedido', cocina.agregarMenuPedido);
 app.get('/cocina/pedidos/menus/:id_pedido', cocina.verMenusPedido);
 app.put('/cocina/pedidos/adicionales/:id_menu_pedido', cocina.adicionalMenuPedido);
+app.get('/cocina/pedidos/adicionales/:id_menu_pedido', cocina.verAdicionalesMenuPedido);
 
 //#####################################################################################
 
@@ -162,7 +163,10 @@ const server = app.listen(app.get('port'), () => {
 });
 
 const jsreport = require('jsreport')({
-  express: { app: reportingApp, server: server },
+  express: {
+    app: reportingApp,
+    server: server
+  },
   appPath: "/reportes",
   connectionString: {
     name: "mongodb",

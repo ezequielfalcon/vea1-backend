@@ -35,7 +35,19 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             if (req.params.id_menu_pedido) {
-              db.manyOrNone('SELECT id_producto FROM adicionales_menu_pedido WHERE id_menu_pedido = $1;', req.params.)
+              db.manyOrNone('SELECT id_producto FROM adicionales_menu_pedido WHERE id_menu_pedido = $1;', req.params.id_menu_pedido)
+                .then(adicionalesMenuPedido => {
+                  res.json({
+                    datos: adicionalesMenuPedido
+                  })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({
+                    resultado: false,
+                    mensaje: err
+                  })
+                })
             } else {
               res.status(400).json({
                 mensaje: 'Faltan parámetros'
@@ -75,6 +87,13 @@ module.exports = function (db) {
                 .then(menusPedido => {
                   res.json({
                     datos: menusPedido
+                  })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({
+                    resultado: false,
+                    mensaje: err
                   })
                 })
             } else {

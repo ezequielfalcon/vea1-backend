@@ -37,8 +37,8 @@ module.exports = function (db) {
         } else {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
-            if (req.params.id_pedido) {
-              db.none('DELETE FROM pedidos WHERE id = $1;', req.params.id_pedido)
+            if (req.params.id) {
+              db.none('DELETE FROM pedidos WHERE id = $1;', req.params.id)
                 .then(() => {
                   res.json({
                     mensaje: 'ok'

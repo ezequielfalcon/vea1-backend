@@ -561,7 +561,7 @@ module.exports = function (db) {
           const roles = JSON.parse(decoded.roles);
           if (roles.includes('admin') || roles.includes('caja')) {
             const nombre = req.body.nombre || null;
-            const observaciones = req.body.observaciones || null;
+            const observaciones = req.body.observacion || null;
             db.one('INSERT INTO pedidos (fecha, id_cliente_int, nombre, observacion) ' +
                 'VALUES (current_timestamp, $1, $2, $3) RETURNING id;', [decoded.cliente, nombre, observaciones])
               .then(nuevoPedido => {

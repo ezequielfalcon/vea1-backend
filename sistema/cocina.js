@@ -20,6 +20,104 @@ module.exports = function (db) {
   module.actualizarPedido = actualizarPedido;
   module.verMenusPedido = verMenusPedido;
   module.verAdicionalesMenuPedido = verAdicionalesMenuPedido;
+  module.quitarMenuPedido = quitarMenuPedido;
+  module.borrarPedido = borrarPedido;
+
+  function borrarPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        } else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id_pedido) {
+              db.none('DELETE FROM pedidos WHERE id = $1;', req.params.id_pedido)
+                .then(() => {
+                  res.json({
+                    mensaje: 'ok'
+                  })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({
+                    resultado: false,
+                    mensaje: err
+                  })
+                })
+            } else {
+              res.status(400).json({
+                mensaje: 'Faltan parámetros'
+              })
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
+
+  function quitarMenuPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        } else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id_menu_pedido) {
+              db.none('DELETE FROM menus_por_pedido WHERE id = $1;', req.params.id_menu_pedido)
+                .then(() => {
+                  res.json({
+                    mensaje: 'ok'
+                  })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({
+                    resultado: false,
+                    mensaje: err
+                  })
+                })
+            } else {
+              res.status(400).json({
+                mensaje: 'Faltan parámetros'
+              })
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function verAdicionalesMenuPedido(req, res) {
     const token = req.headers['x-access-token'];

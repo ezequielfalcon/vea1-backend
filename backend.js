@@ -149,6 +149,7 @@ app.post('/cocina/pedidos', cocina.crearPedido);
 app.get('/cocina/pedidos/:id', cocina.verPedido);
 app.put('/cocina/pedidos/:id', cocina.actualizarPedido);
 app.delete('/cocina/pedidos/:id', cocina.borrarPedido);
+app.put('/cocina/pedidos/confirmar/:id', cocina.confirmarPedido);
 app.get('/cocina/pedidos-pendientes', cocina.verPedidosPendientes);
 app.get('/cocina/pedidos-cerrados', cocina.verPedidosCerrados);
 app.put('/cocina/pedidos/menus/:id_pedido', cocina.agregarMenuPedido);

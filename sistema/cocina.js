@@ -23,6 +23,55 @@ module.exports = function (db) {
   module.verAdicionalesMenuPedido = verAdicionalesMenuPedido;
   module.quitarMenuPedido = quitarMenuPedido;
   module.borrarPedido = borrarPedido;
+  module.confirmarPedido = confirmarPedido;
+
+  function confirmarPedido(req, res) {
+    const token = req.headers['x-access-token'];
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          console.log("Error de autenticación, token inválido!\n" + err);
+          res.status(401).json({
+            resultado: false,
+            mensaje: "Error de autenticación"
+          });
+        } else {
+          const roles = JSON.parse(decoded.roles);
+          if (roles.includes('admin') || roles.includes('caja')) {
+            if (req.params.id) {
+              db.none('INSERT INTO estados_por_pedido (id_pedido, id_estado, fecha) VALUES ($1, 2, current_timestamp);', req.params.id)
+                .then(() => {
+                  res.json({
+                    mensaje: 'ok'
+                  })
+                })
+                .catch(err => {
+                  console.error(err);
+                  res.status(500).json({
+                    resultado: false,
+                    mensaje: err
+                  })
+                })
+            } else {
+              res.status(400).json({
+                mensaje: 'Faltan parámetros'
+              })
+            }
+          } else {
+            res.status(403).json({
+              resultado: false,
+              mensaje: 'Permiso denegado!'
+            });
+          }
+        }
+      });
+    } else {
+      res.status(401).json({
+        resultado: false,
+        mensaje: 'No token provided.'
+      });
+    }
+  }
 
   function borrarPedido(req, res) {
     const token = req.headers['x-access-token'];

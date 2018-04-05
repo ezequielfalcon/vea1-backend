@@ -143,6 +143,20 @@ app.delete('/cocina/menus/ingredientes/:id_menu/:id_producto', cocina.borrarIngr
 app.post('/cocina/menus', cocina.crearMenu);
 app.get('/cocina/ingredientes', cocina.verIngredientes);
 app.get('/cocina/ingredientes/:id_menu', cocina.verIngredientesMenu);
+//pedidos
+app.get('/cocina/pedidos/adicionales', cocina.verAdicionales);
+app.post('/cocina/pedidos', cocina.crearPedido);
+app.get('/cocina/pedidos/:id', cocina.verPedido);
+app.put('/cocina/pedidos/:id', cocina.actualizarPedido);
+app.delete('/cocina/pedidos/:id', cocina.borrarPedido);
+app.put('/cocina/pedidos/confirmar/:id', cocina.confirmarPedido);
+app.get('/cocina/pedidos-pendientes', cocina.verPedidosPendientes);
+app.get('/cocina/pedidos-cerrados', cocina.verPedidosCerrados);
+app.put('/cocina/pedidos/menus/:id_pedido', cocina.agregarMenuPedido);
+app.delete('/cocina/pedidos/menus/:id_menu_pedido', cocina.quitarMenuPedido);
+app.get('/cocina/pedidos/menus/:id_pedido', cocina.verMenusPedido);
+app.put('/cocina/pedidos/adicionales/:id_menu_pedido', cocina.adicionalMenuPedido);
+app.get('/cocina/pedidos/adicionales/:id_menu_pedido', cocina.verAdicionalesMenuPedido);
 
 //#####################################################################################
 
@@ -152,7 +166,10 @@ const server = app.listen(app.get('port'), () => {
 });
 
 const jsreport = require('jsreport')({
-  express: { app: reportingApp, server: server },
+  express: {
+    app: reportingApp,
+    server: server
+  },
   appPath: "/reportes",
   connectionString: {
     name: "mongodb",
